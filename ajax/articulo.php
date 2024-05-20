@@ -1,7 +1,7 @@
 <?php
 ob_start();
 if (strlen(session_id()) < 1) {
-	session_start(); //Validamos si existe o no la sesión
+	session_start(); // Validamos si existe o no la sesión
 }
 
 // si no está logeado o no tiene ningún cargo...
