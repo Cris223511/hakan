@@ -16,7 +16,6 @@ require_once "../modelos/Usuario.php";
 $usuario = new Usuario();
 
 $idusuario = isset($_POST["idusuario"]) ? limpiarCadena($_POST["idusuario"]) : "";
-$idlocal = isset($_POST["idlocal"]) ? limpiarCadena($_POST["idlocal"]) : "";
 $nombre = isset($_POST["nombre"]) ? limpiarCadena($_POST["nombre"]) : "";
 $tipo_documento = isset($_POST["tipo_documento"]) ? limpiarCadena($_POST["tipo_documento"]) : "";
 $num_documento = isset($_POST["num_documento"]) ? limpiarCadena($_POST["num_documento"]) : "";
@@ -43,7 +42,7 @@ switch ($_GET["op"]) {
 					$targetFile = $uploadDirectory . $newFileName;
 
 					// Verificar si es una imagen y mover el archivo
-					$allowedExtensions = array('jpg', 'jpeg', 'png');
+					$allowedExtensions = array('jpg', 'jpeg', 'png', 'jfif', 'bmp');
 					if (in_array($fileExtension, $allowedExtensions) && move_uploaded_file($tempFile, $targetFile)) {
 						// El archivo se ha movido correctamente, ahora $newFileName contiene el nombre del archivo
 						$imagen = $newFileName;
@@ -65,7 +64,7 @@ switch ($_GET["op"]) {
 					} else if ($usuarioExiste) {
 						echo "El nombre del usuario que ha ingresado ya existe.";
 					} else {
-						$rspta = $usuario->insertar($idlocal, $nombre, $tipo_documento, $num_documento, $direccion, $telefono, $email, $cargo, $login, $clave, $imagen, $_POST['permiso']);
+						$rspta = $usuario->insertar($$nombre, $tipo_documento, $num_documento, $direccion, $telefono, $email, $cargo, $login, $clave, $imagen, $_POST['permiso']);
 						echo $rspta ? "Usuario registrado" : "Usuario no se pudo registrar.";
 					}
 				} else {
@@ -73,7 +72,7 @@ switch ($_GET["op"]) {
 					if ($usuarioExiste) {
 						echo "El nombre del usuario que ha ingresado ya existe.";
 					} else {
-						$rspta = $usuario->editar($idusuario, $idlocal, $nombre, $tipo_documento, $num_documento, $direccion, $telefono, $email, $cargo, $login, $clave, $imagen, $_POST['permiso']);
+						$rspta = $usuario->editar($idusuario, $$nombre, $tipo_documento, $num_documento, $direccion, $telefono, $email, $cargo, $login, $clave, $imagen, $_POST['permiso']);
 						echo $rspta ? "Usuario actualizado" : "Usuario no se pudo actualizar";
 					}
 				}
@@ -138,20 +137,14 @@ switch ($_GET["op"]) {
 				while ($reg = $rspta->fetch_object()) {
 					$cargo_detalle = "";
 					switch ($reg->cargo) {
-						case 'superadmin':
-							$cargo_detalle = "Superadministrador";
-							break;
-						case 'admin_total':
-							$cargo_detalle = "Admin Total";
-							break;
-						case 'admin_total':
-							$cargo_detalle = "Admin Total";
-							break;
 						case 'admin':
 							$cargo_detalle = "Administrador";
 							break;
-						case 'cajero':
-							$cargo_detalle = "Cajero";
+						case 'vendedor':
+							$cargo_detalle = "Vendedor";
+							break;
+						case 'cliente':
+							$cargo_detalle = "Cliente";
 							break;
 						default:
 							break;
@@ -163,24 +156,22 @@ switch ($_GET["op"]) {
 						"0" => '<div style="display: flex; flex-wrap: nowrap; gap: 3px">' .
 							(!(($reg->cargo == "superadmin" && $_SESSION['cargo'] == 'admin') || ($reg->cargo == "admin_total" && $_SESSION['cargo'] == 'admin') || ($reg->cargo == "superadmin" && $_SESSION['cargo'] == 'admin_total')) ?
 								((($reg->estado) ?
-									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px;" onclick="mostrar(' . $reg->idusuario . '); verificarCargo(\'' . $reg->cargo . '\');"><i class="fa fa-pencil"></i></button>') : '') .
-									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="margin-right: 3px; height: 35px;" onclick="desactivar(' . $reg->idusuario . ')"><i class="fa fa-close"></i></button>') : '') .
-									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '') : (($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px; height: 35px;" onclick="mostrar(' . $reg->idusuario . '); verificarCargo(\'' . $reg->cargo . '\');"><i class="fa fa-pencil"></i></button>') : '') .
-									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-success" style="margin-right: 3px; width: 35px; height: 35px; padding: 0;" onclick="activar(' . $reg->idusuario . ')"><i style="margin-left: -2px" class="fa fa-check"></i></button>') : '') .
-									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '')) . '</div>') : ("")),
+									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px;" onclick="mostrar(' . $reg->idusuario . ');"><i class="fa fa-pencil"></i></button>') : '') .
+									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="margin-right: 3px; height: 35px;" onclick="desactivar(' . $reg->idusuario . ')"><i class="fa fa-close"></i></button>') : '') .
+									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '') : (($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px; height: 35px;" onclick="mostrar(' . $reg->idusuario . ');"><i class="fa fa-pencil"></i></button>') : '') .
+									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-success" style="margin-right: 3px; width: 35px; height: 35px; padding: 0;" onclick="activar(' . $reg->idusuario . ')"><i style="margin-left: -2px" class="fa fa-check"></i></button>') : '') .
+									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '')) . '</div>') : ("")),
 						"1" => $reg->nombre,
 						"2" => $reg->login,
 						"3" => $cargo_detalle,
-						"4" => $reg->local,
-						"5" => "N° " . $reg->local_ruc,
-						"6" => $reg->tipo_documento,
-						"7" => $reg->num_documento,
-						"8" => $telefono,
-						"9" => $reg->email,
-						"10" => '<a href="../files/usuarios/' . $reg->imagen . '" class="galleria-lightbox" style="z-index: 10000 !important;">
+						"4" => $reg->tipo_documento,
+						"5" => $reg->num_documento,
+						"6" => $telefono,
+						"7" => $reg->email,
+						"8" => '<a href="../files/usuarios/' . $reg->imagen . '" class="galleria-lightbox" style="z-index: 10000 !important;">
 									<img src="../files/usuarios/' . $reg->imagen . '" height="50px" width="50px" class="img-fluid">
 								</a>',
-						"11" => ($reg->estado) ? '<span class="label bg-green">Activado</span>' :
+						"9" => ($reg->estado) ? '<span class="label bg-green">Activado</span>' :
 							'<span class="label bg-red">Desactivado</span>'
 					);
 				}
@@ -206,14 +197,11 @@ switch ($_GET["op"]) {
 				case 'superadmin':
 					$cargo_detalle = "Superadministrador";
 					break;
-				case 'admin_total':
-					$cargo_detalle = "Admin Total";
+				case 'vendedor':
+					$cargo_detalle = "Vendedor";
 					break;
-				case 'admin':
-					$cargo_detalle = "Administrador";
-					break;
-				case 'cajero':
-					$cargo_detalle = "Cajero";
+				case 'cliente':
+					$cargo_detalle = "Cliente";
 					break;
 				default:
 					break;
@@ -224,7 +212,7 @@ switch ($_GET["op"]) {
 
 	case 'selectUsuarios':
 		$cargoSession = $_SESSION["cargo"];
-		if ($cargoSession == "superadmin" || $cargoSession == "admin_total" || $cargoSession == "admin") {
+		if ($cargoSession == "admin") {
 			$rspta = $usuario->listarASCactivos();
 		} else {
 			$rspta = $usuario->listarPorUsuarioASCActivos($_SESSION['idusuario']);
@@ -237,14 +225,11 @@ switch ($_GET["op"]) {
 				case 'superadmin':
 					$cargo_detalle = "Superadministrador";
 					break;
-				case 'admin_total':
-					$cargo_detalle = "Admin Total";
+				case 'vendedor':
+					$cargo_detalle = "Vendedor";
 					break;
-				case 'admin':
-					$cargo_detalle = "Administrador";
-					break;
-				case 'cajero':
-					$cargo_detalle = "Cajero";
+				case 'cliente':
+					$cargo_detalle = "Cliente";
 					break;
 				default:
 					break;
@@ -274,8 +259,7 @@ switch ($_GET["op"]) {
 
 	case 'getSessionId':
 		$sessionIdData = array(
-			'idusuario' => $_SESSION['idusuario'],
-			'idlocal' => $_SESSION['idlocal']
+			'idusuario' => $_SESSION['idusuario']
 		);
 
 		echo json_encode($sessionIdData);
@@ -300,21 +284,8 @@ switch ($_GET["op"]) {
 				return;
 			}
 
-			$localExiste = $usuario->localExiste($fetch->idlocal);
-			if ($localExiste == 0) {
-				echo 3;
-				return;
-			}
-
-			if ($fetch->estadoLocal == "desactivado") {
-				echo 2;
-				return;
-			}
-
 			//Declaramos las variables de sesión
 			$_SESSION['idusuario'] = $fetch->idusuario;
-			$_SESSION['idlocal'] = $fetch->idlocal;
-			$_SESSION['local'] = $fetch->local;
 			$_SESSION['nombre'] = $fetch->nombre;
 			$_SESSION['imagen'] = $fetch->imagen;
 			$_SESSION['login'] = $fetch->login;
@@ -325,14 +296,11 @@ switch ($_GET["op"]) {
 				case 'superadmin':
 					$_SESSION['cargo_detalle'] = "Superadministrador";
 					break;
-				case 'admin_total':
-					$_SESSION['cargo_detalle'] = "Admin Total";
+				case 'vendedor':
+					$_SESSION['cargo_detalle'] = "Vendedor";
 					break;
-				case 'admin':
-					$_SESSION['cargo_detalle'] = "Administrador";
-					break;
-				case 'cajero':
-					$_SESSION['cargo_detalle'] = "Cajero";
+				case 'cliente':
+					$_SESSION['cargo_detalle'] = "Cliente";
 					break;
 				default:
 					break;
@@ -349,18 +317,11 @@ switch ($_GET["op"]) {
 			in_array(2, $valores) ? $_SESSION['acceso'] = 1 : $_SESSION['acceso'] = 0;
 			in_array(3, $valores) ? $_SESSION['perfilu'] = 1 : $_SESSION['perfilu'] = 0;
 			in_array(4, $valores) ? $_SESSION['almacen'] = 1 : $_SESSION['almacen'] = 0;
-			in_array(5, $valores) ? $_SESSION['personas'] = 1 : $_SESSION['personas'] = 0;
-			in_array(6, $valores) ? $_SESSION['ventas'] = 1 : $_SESSION['ventas'] = 0;
-			in_array(7, $valores) ? $_SESSION['compras'] = 1 : $_SESSION['compras'] = 0;
-			in_array(8, $valores) ? $_SESSION['cajas'] = 1 : $_SESSION['cajas'] = 0;
-			in_array(9, $valores) ? $_SESSION['pagos'] = 1 : $_SESSION['pagos'] = 0;
-			in_array(10, $valores) ? $_SESSION['servicios'] = 1 : $_SESSION['servicios'] = 0;
-			in_array(11, $valores) ? $_SESSION['reportes'] = 1 : $_SESSION['reportes'] = 0;
-			in_array(12, $valores) ? $_SESSION['reportesP'] = 1 : $_SESSION['reportesP'] = 0;
-			in_array(13, $valores) ? $_SESSION['reportesM'] = 1 : $_SESSION['reportesM'] = 0;
-			in_array(14, $valores) ? $_SESSION['reportesE'] = 1 : $_SESSION['reportesE'] = 0;
-			in_array(15, $valores) ? $_SESSION['comisiones'] = 1 : $_SESSION['comisiones'] = 0;
-			in_array(16, $valores) ? $_SESSION['PExternos'] = 1 : $_SESSION['PExternos'] = 0;
+			in_array(5, $valores) ? $_SESSION['ventas'] = 1 : $_SESSION['ventas'] = 0;
+			in_array(6, $valores) ? $_SESSION['pagos'] = 1 : $_SESSION['pagos'] = 0;
+			in_array(7, $valores) ? $_SESSION['reportes'] = 1 : $_SESSION['reportes'] = 0;
+			in_array(8, $valores) ? $_SESSION['reportesP'] = 1 : $_SESSION['reportesP'] = 0;
+			in_array(9, $valores) ? $_SESSION['reportesM'] = 1 : $_SESSION['reportesM'] = 0;
 		}
 		echo json_encode($fetch);
 		break;

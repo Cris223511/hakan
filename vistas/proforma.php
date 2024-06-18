@@ -430,7 +430,7 @@ if (!isset($_SESSION["nombre"])) {
                   <button class="btn btn-bcp" id="btnagregar" onclick="validarCaja();">
                     <i class="fa fa-plus-circle"></i> Nueva proforma
                   </button>
-                  <?php if ($_SESSION["cargo"] == "superadmin" || $_SESSION["cargo"] == "admin_total") { ?>
+                  <?php if ($_SESSION["cargo"] == "admin") { ?>
                     <a href="../reportes/rptproformas.php" target="_blank">
                       <button class="btn btn-secondary" style="color: black !important;">
                         <i class="fa fa-clipboard"></i> Reporte
@@ -678,7 +678,7 @@ if (!isset($_SESSION["nombre"])) {
               </div>
               <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                 <label>Imagen(*):</label>
-                <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg">
+                <input type="file" class="form-control" name="imagen" id="imagen" accept=".jpg,.jpeg,.png,.jfif,.bmp">
               </div>
               <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <label>Descripción:</label>
@@ -980,7 +980,7 @@ if (!isset($_SESSION["nombre"])) {
                 </div>
               </div>
               <div class="col-lg-4 col-md-6 col-sm-6">
-                <?php if ($_SESSION["cargo"] == "superadmin" || $_SESSION["cargo"] == "admin_total") { ?>
+                <?php if ($_SESSION["cargo"] == "admin") { ?>
                   <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0;">
                     <label>Local (*):</label>
                     <select id="idlocal_session" class="form-control selectpicker" data-live-search="true" data-size="5" required onchange="actualizarCorrelativoLocal(this.value)">
@@ -1319,7 +1319,7 @@ if (!isset($_SESSION["nombre"])) {
                   </div>
                   <div class="form-group col-lg-4 col-md-6 col-sm-12">
                     <label>Imagen:</label>
-                    <input type="file" class="form-control" name="imagen" id="imagen2" accept="image/x-png,image/gif,image/jpeg">
+                    <input type="file" class="form-control" name="imagen" id="imagen2" accept=".jpg,.jpeg,.png,.jfif,.bmp">
                     <input type="hidden" name="imagenactual" id="imagenactual">
                   </div>
                   <div class="form-group col-lg-6 col-md-6 col-sm-12">

@@ -43,12 +43,12 @@ function mostrar() {
 		console.log(data);
 		$("#idreporte").val(data.idreporte);
 		$("#titulo").val(data.titulo);
-		$("#auspiciado").val(data.auspiciado);
 		$("#ruc").val(data.ruc);
 		$("#direccion").val(data.direccion);
 		$("#telefono").val(data.telefono);
 		$("#email").val(data.email);
 		$("#imagenmuestra").attr("src", "../files/logo_reportes/" + data.imagen);
+		$("#imagenmuestra").show();
 		$("#imagenactual").val(data.imagen);
 	});
 }

@@ -61,15 +61,6 @@ if (!isset($_SESSION["nombre"])) {
                     <input type="email" class="form-control" name="email" id="email" maxlength="50" placeholder="Email">
                   </div>
                   <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                    <label>Local principal(*):</label>
-                    <select id="idlocal" name="idlocal" class="form-control selectpicker" data-live-search="true" data-size="5" onchange="actualizarRUC()" required>
-                    </select>
-                  </div>
-                  <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                    <label>RUC local(*):</label>
-                    <input type="number" class="form-control" id="local_ruc" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="11" placeholder="RUC del local" disabled>
-                  </div>
-                  <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                     <label>Usuario(*):</label>
                     <input type="text" class="form-control" name="login" id="login" maxlength="20" placeholder="Usuario" required>
                   </div>
@@ -82,7 +73,7 @@ if (!isset($_SESSION["nombre"])) {
                   </div>
                   <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                     <label>Imagen:</label>
-                    <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg">
+                    <input type="file" class="form-control" name="imagen" id="imagen" accept=".jpg,.jpeg,.png,.jfif,.bmp">
                     <input type="hidden" name="imagenactual" id="imagenactual"><br>
                     <img src="" width="150px" id="imagenmuestra" style="display: none;">
                   </div>

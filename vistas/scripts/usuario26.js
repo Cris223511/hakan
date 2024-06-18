@@ -1,5 +1,4 @@
 var tabla;
-let select = $("#idlocal"); // select
 
 //Función que se ejecuta al inicio
 function init() {
@@ -30,53 +29,15 @@ function toggleCheckboxes(checkbox) {
 	});
 }
 
-function cargarLocalDisponible() {
-	select.empty();
-	// Cargamos los items al select "local principal"
-	$.post("../ajax/locales.php?op=selectLocales", function (data) {
-		// console.log(data);
-		objSelects = JSON.parse(data);
-		console.log(objSelects);
-		if (objSelects.length != 0) {
-			select.html('<option value="">- Seleccione -</option>');
-
-			objSelects.locales.forEach(function (opcion) {
-				select.append('<option value="' + opcion.idlocal + '" data-local-ruc="' + opcion.local_ruc + '">' + opcion.titulo + '</option>');
-			});
-			select.selectpicker('refresh');
-		} else {
-			console.log("no hay datos =)")
-		}
-		limpiar();
-	});
-}
-
-function actualizarRUC() {
-	const selectLocal = document.getElementById("idlocal");
-	const localRUCInput = document.getElementById("local_ruc");
-	const selectedOption = selectLocal.options[selectLocal.selectedIndex];
-
-	if (selectedOption.value !== "") {
-		const localRUC = selectedOption.getAttribute('data-local-ruc');
-		localRUCInput.value = localRUC;
-	} else {
-		localRUCInput.value = "";
-	}
-}
-
 //Función limpiar
 function limpiar() {
 	$("#nombre").val("");
-	$("#idlocal").val($("#idlocal option:first").val());
-	$("#idlocal").selectpicker('refresh');
 	$("tipo_documento").val("");
 	$("#num_documento").val("");
 	$("#direccion").val("");
 	$("#telefono").val("");
 	$("#email").val("");
-	$("#local_ruc").val("");
-	$("#cargo").val("admin");
-	$('#cargo option[value="superadmin"]').remove();
+	$("#cargo").val("");
 	$("#cargo").selectpicker('refresh');
 	$("#login").val("");
 	$("#clave").val("");
@@ -101,7 +62,6 @@ function mostrarform(flag) {
 		$("#listadoregistros").show();
 		$("#formularioregistros").hide();
 		$("#btnagregar").show();
-		cargarLocalDisponible();
 
 		// desenmarcamos los selects
 		$("#permisos input[type='checkbox']").each(function () {
@@ -114,16 +74,6 @@ function mostrarform(flag) {
 function cancelarform() {
 	limpiar();
 	mostrarform(false);
-}
-
-function verificarCargo(cargo) {
-	console.log(cargo);
-	$('#cargo option[value="superadmin"]').remove();
-
-	if (cargo == "superadmin") {
-		$('#cargo').prepend('<option value="superadmin">Superadministrador</option>');
-		$('#cargo').selectpicker('refresh');
-	}
 }
 
 //Función Listar
@@ -221,9 +171,6 @@ function mostrar(idusuario) {
 		$("#direccion").val(data.direccion);
 		$("#telefono").val(data.telefono);
 		$("#email").val(data.email);
-		$("#idlocal").val(data.idlocal);
-		$("#idlocal").selectpicker('refresh');
-		$("#local_ruc").val(data.local_ruc);
 		$("#cargo").val(data.cargo);
 		$("#cargo").selectpicker('refresh');
 		$("#login").val(data.login);
@@ -272,7 +219,6 @@ function eliminar(idusuario) {
 			$.post("../ajax/usuario.php?op=eliminar", { idusuario: idusuario }, function (e) {
 				bootbox.alert(e);
 				tabla.ajax.reload();
-				cargarLocalDisponible();
 			});
 		}
 	})

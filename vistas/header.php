@@ -4,7 +4,6 @@ if (strlen(session_id()) < 1)
 
 $nombre_login = $_SESSION['nombre'];
 $cargo_login = $_SESSION['cargo_detalle'];
-$local_login = $_SESSION['local'];
 ?>
 
 <style>
@@ -225,8 +224,8 @@ $local_login = $_SESSION['local'];
 
     <header class="main-header" style="box-shadow: 0px 0px 15px -7px; position: sticky !important; width: 100%">
       <a href="escritorio.php" class="logo" style="color: white !important; background-color: #002a8e !important;">
-        <span class="logo-mini"><b>S.V.</b></span>
-        <span class="logo-lg" style="font-size: 15px;"><b>Sistema de ventas</b></span>
+        <span class="logo-mini"><b>H.I.</b></span>
+        <span class="logo-lg" style="font-size: 15px;"><b>Hakan Export S.A.C.</b></span>
       </a>
       <nav class="navbar" role="navigation" style="background-color: #002a8e !important;">
         <div style="display: flex; align-items: center; float: left;">
@@ -237,7 +236,6 @@ $local_login = $_SESSION['local'];
         <div class="navbar-custom-menu">
           <ul class="nav navbar-nav">
             <li class="dropdown user user-menu" style="background: #002a8e !important; display: inline-flex; align-items: center; height: 50px;">
-              <span style="color: white !important;" class="hidden-xs user-info local"><?php echo '<strong> Local: ' . $local_login . '</strong>' ?></span>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="color: white !important; height: 50px;">
                 <img src="../files/usuarios/<?php echo $_SESSION['imagen']; ?>" class="user-image" alt="User Image">
                 <span class="hidden-xs user-info user"><?php echo $nombre_login; ?> - <?php echo '<strong> Rol: ' . $cargo_login . '</strong>' ?></span>
@@ -246,8 +244,8 @@ $local_login = $_SESSION['local'];
                 <li class="user-header" style="background: #002a8e !important;">
                   <img src="../files/usuarios/<?php echo $_SESSION['imagen']; ?>" class="img-circle" alt="User Image">
                   <p style="color: white !important;">
-                    Sistema de ventas
-                    <small>nuestro contacto: +51 937 075 845</small>
+                    Hakan Export S.A.C.
+                    <small>nuestro contacto: +51 992 719 552</small>
                   </p>
                 </li>
                 <li class="user-footer">
@@ -276,17 +274,6 @@ $local_login = $_SESSION['local'];
           ?>
 
           <?php
-          if ($_SESSION['servicios'] == 1) {
-            echo '<li id="mServicios" class="treeview">
-              <a href="servicios.php">
-                <i class="fa fa-cogs"></i>
-                <span>Servicios</span>
-              </a>
-            </li>';
-          }
-          ?>
-
-          <?php
           if ($_SESSION['almacen'] == 1) {
             echo '<li id="mAlmacen" class="treeview">
               <a href="#">
@@ -296,32 +283,7 @@ $local_login = $_SESSION['local'];
               </a>
               <ul class="treeview-menu">
                 <li id="lArticulos"><a href="articulo.php"><i class="fa fa-circle-o"></i> Productos</a></li>
-                ';
-            if (($_SESSION['cargo'] == "superadmin" || $_SESSION['cargo'] == "admin_total") && $_SESSION['PExternos'] == 1) {
-              echo '<li id="lArticulosExternos"><a href="articuloExterno.php"><i class="fa fa-circle-o"></i> Productos Externos</a></li>';
-            }
-            echo '
                 <li id="lCategorias"><a href="categoria.php"><i class="fa fa-circle-o"></i> Categorías</a></li>
-                <li id="lLocales"><a href="locales.php"><i class="fa fa-circle-o"></i> Locales</a></li>
-                <li id="lMilocal"><a href="miLocal.php"><i class="fa fa-circle-o"></i> Mi local</a></li>
-                <li id="lMarcas"><a href="marcas.php"><i class="fa fa-circle-o"></i> Marcas</a></li>
-                <li id="lMedidas"><a href="medidas.php"><i class="fa fa-circle-o"></i> Unidades de medidas</a></li>
-              </ul>
-            </li>';
-          }
-          ?>
-
-          <?php
-          if ($_SESSION['compras'] == 1) {
-            echo '<li id="mCompras" class="treeview">
-              <a href="#">
-                <i class="fa fa-cart-plus"></i>
-                <span>Compras</span>
-                <i class="fa fa-angle-left pull-right"></i>
-              </a>
-              <ul class="treeview-menu">
-                <li id="lCompras"><a href="compra.php"><i class="fa fa-circle-o"></i> Compras</a></li>
-                <li id="lProveedor"><a href="proveedores.php"><i class="fa fa-circle-o"></i> Proveedores</a></li>
               </ul>
             </li>';
           }
@@ -345,56 +307,11 @@ $local_login = $_SESSION['local'];
           ?>
 
           <?php
-          if ($_SESSION['cajas'] == 1) {
-            echo '<li id="mCajas" class="treeview">
-              <a href="#">
-                <i class="fa fa-archive"></i>
-                <span>Flujo de caja</span>
-                <i class="fa fa-angle-left pull-right"></i>
-              </a>
-              <ul class="treeview-menu">
-                <li id="lAperturas"><a href="aperturas.php"><i class="fa fa-circle-o"></i> Aperturas</a></li>
-                <li id="lCierres"><a href="cierres.php"><i class="fa fa-circle-o"></i> Cierres</a></li>
-                <li id="lRetiros"><a href="retiros.php"><i class="fa fa-circle-o"></i> Retiros</a></li>
-                <li id="lGastos"><a href="gastos.php"><i class="fa fa-circle-o"></i> Gastos</a></li>
-              </ul>
-            </li>';
-          }
-          ?>
-
-          <?php
           if ($_SESSION['pagos'] == 1) {
             echo '<li id="mPagos" class="treeview">
               <a href="metodo_pago.php">
                 <i class="fa fa-credit-card"></i>
                 <span>Métodos de pago</span>
-              </a>
-            </li>';
-          }
-          ?>
-
-          <?php
-          if ($_SESSION['personas'] == 1) {
-            echo '<li id="mPersonas" class="treeview">
-              <a href="#">
-                <i class="fa fa-users"></i>
-                <span>Personas</span>
-                <i class="fa fa-angle-left pull-right"></i>
-              </a>
-              <ul class="treeview-menu">
-              <li id="lTrabajadores"><a href="trabajadores.php"><i class="fa fa-circle-o"></i> Trabajadores</a></li>
-              <li id="lPersonales"><a href="personales.php"><i class="fa fa-circle-o"></i> Empleados</a></li>
-              </ul>
-            </li>';
-          }
-          ?>
-
-          <?php
-          if ($_SESSION['comisiones'] == 1) {
-            echo '<li id="mComisiones" class="treeview">
-              <a href="comisiones.php">
-                <i style="text-align: center; margin-left: -3px; margin-right: 1px" class="fa fa-dollar"></i>
-                <span>Comisiones</span>
               </a>
             </li>';
           }
@@ -411,12 +328,10 @@ $local_login = $_SESSION['local'];
             <ul class="treeview-menu">
               <li id="lConfUsuario"><a href="confUsuario.php"><i class="fa fa-circle-o"></i> Configuración de perfil</a></li>
               ';
-            if ($_SESSION['cargo'] == "superadmin" || $_SESSION['cargo'] == "admin_total" || $_SESSION['cargo'] == "admin") {
+            if ($_SESSION['cargo'] == "admin") {
               echo '
                 <li id="lConfPortada"><a href="confPortada.php"><i class="fa fa-circle-o"></i> Configuración de portada</a></li>
                 <li id="lConfBoleta"><a href="confBoleta.php"><i class="fa fa-circle-o"></i> Configuración de boletas</a></li>
-                <li id="lLocalesExternos"><a href="localesExternos.php"><i class="fa fa-circle-o"></i> Locales externos</a></li>
-                <li id="lLocalesDisponibles"><a href="localesDisponibles.php"><i class="fa fa-circle-o"></i> Locales disponibles</a></li>
               ';
             }
             echo '
@@ -436,7 +351,6 @@ $local_login = $_SESSION['local'];
               <ul class="treeview-menu">
               <li id="lReporteVenta"><a href="reporteVenta.php"><i class="fa fa-circle-o"></i> Reporte de ventas</a></li>
               <li id="lReporteCotizacion"><a href="reporteProforma.php"><i class="fa fa-circle-o"></i> Reporte de cotizaciones</a></li>
-              <li id="lReporteCompra"><a href="reporteCompra.php"><i class="fa fa-circle-o"></i> Reporte de compras</a></li>
               </ul>
             </li>';
           }
@@ -452,7 +366,6 @@ $local_login = $_SESSION['local'];
               </a>
               <ul class="treeview-menu">
               <li id="lReporteProductosV"><a href="reporteProductoMasVendido.php"><i class="fa fa-circle-o"></i> Productos más vendidos</a></li>
-              <li id="lReporteProductosC"><a href="reporteProductoMasComprado.php"><i class="fa fa-circle-o"></i> Productos más comprados</a></li>
               </ul>
             </li>';
           }
@@ -469,22 +382,6 @@ $local_login = $_SESSION['local'];
               <ul class="treeview-menu">
               <li id="lReporteVentaMetodoPago"><a href="reporteVentaMetodoPago.php"><i class="fa fa-circle-o"></i> Métodos de pago (ventas)</a></li>
               <li id="lReporteProformaMetodoPago"><a href="reporteProformaMetodoPago.php"><i class="fa fa-circle-o"></i> Métodos de pago (cotizaciones)</a></li>
-              <li id="lReporteCompraMetodoPago"><a href="reporteCompraMetodoPago.php"><i class="fa fa-circle-o"></i> Métodos de pago (compras)</a></li>
-              </ul>
-            </li>';
-          }
-          ?>
-
-          <?php
-          if ($_SESSION['reportesE'] == 1) {
-            echo '<li id="mReportesE" class="treeview">
-              <a href="#">
-                <i class="fa fa-balance-scale"></i>
-                <span>Reportes de empleados</span>
-                <i class="fa fa-angle-left pull-right"></i>
-              </a>
-              <ul class="treeview-menu">
-              <li id="lReporteVentaEmpleados"><a href="reporteEmpleado.php"><i class="fa fa-circle-o"></i> Reporte empleados (ventas)</a></li>
               </ul>
             </li>';
           }
@@ -511,7 +408,7 @@ $local_login = $_SESSION['local'];
             </a>
           </li>
           <?php
-          // if ($_SESSION['cargo'] == "superadmin" || $_SESSION['cargo'] == "admin_total") {
+          // if ($_SESSION['cargo'] == "admin") {
           ?>
           <!-- <li id="sql_export">
               <a>

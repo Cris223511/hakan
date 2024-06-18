@@ -17,7 +17,7 @@ if (!isset($_SESSION["nombre"])) {
               <div class="box-header with-border">
                 <h1 class="box-title">Usuarios
                   <?php
-                  if ($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') {
+                  if ($_SESSION['cargo'] == 'admin') {
                   ?>
                     <button class="btn btn-bcp" id="btnagregar" onclick="mostrarform(true)">
                       <i class="fa fa-plus-circle"></i> Agregar
@@ -25,14 +25,14 @@ if (!isset($_SESSION["nombre"])) {
                   <?php
                   }
                   ?>
-                  <?php if ($_SESSION["cargo"] == "superadmin" || $_SESSION["cargo"] == "admin_total") { ?>
+                  <?php if ($_SESSION["cargo"] == "admin") { ?>
                     <a href="../reportes/rptusuarios.php" target="_blank">
                       <button class="btn btn-secondary" style="color: black !important;">
                         <i class="fa fa-clipboard"></i> Reporte
                       </button>
                     </a>
                   <?php } ?>
-                  <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Usuarios</strong>" data-html="true" data-content="Módulo para registrar los usuarios quienes tendrán acceso al sistema. Los usuarios pueden tener los roles de <strong>cajero y administrador</strong>." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
+                  <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Usuarios</strong>" data-html="true" data-content="Módulo para registrar los usuarios quienes tendrán acceso al sistema. Los usuarios pueden tener los roles de <strong>administrador, vendedor y cliente</strong>." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
                 </h1>
                 <div class="box-tools pull-right">
                 </div>
@@ -44,8 +44,6 @@ if (!isset($_SESSION["nombre"])) {
                     <th style="width: 20%; min-width: 180px;">Nombre</th>
                     <th>Usuario</th>
                     <th>Cargo</th>
-                    <th style="width: 15%; min-width: 220px;">Almacén</th>
-                    <th>RUC del local</th>
                     <th>Documento</th>
                     <th>Número Doc.</th>
                     <th>Teléfono</th>
@@ -60,8 +58,6 @@ if (!isset($_SESSION["nombre"])) {
                     <th>Nombre</th>
                     <th>Usuario</th>
                     <th>Cargo</th>
-                    <th>Almacén</th>
-                    <th>RUC del local</th>
                     <th>Documento</th>
                     <th>Número Doc.</th>
                     <th>Teléfono</th>
@@ -92,16 +88,6 @@ if (!isset($_SESSION["nombre"])) {
                     <input type="number" class="form-control" name="num_documento" id="num_documento" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="8" placeholder="Documento" required>
                   </div>
                   <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                    <label id="locales">Local principal(*):</label>
-                    <select id="idlocal" name="idlocal" class="form-control selectpicker" data-live-search="true" data-size="5" onchange="actualizarRUC()" required>
-                      <option value="">- Seleccione -</option>
-                    </select>
-                  </div>
-                  <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                    <label>RUC local(*):</label>
-                    <input type="number" class="form-control" id="local_ruc" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="11" placeholder="RUC del local" disabled>
-                  </div>
-                  <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                     <label>Dirección:</label>
                     <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Dirección" maxlength="80">
                   </div>
@@ -116,11 +102,10 @@ if (!isset($_SESSION["nombre"])) {
                   <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                     <label>Cargo(*):</label>
                     <select name="cargo" id="cargo" class="form-control selectpicker" required>
+                      <option value="">- Seleccione -</option>
                       <option value="admin">Administrador</option>
-                      <?php if ($_SESSION["cargo"] == "superadmin") { ?>
-                        <option value="admin_total">Admin Total</option>
-                      <?php } ?>
-                      <option value="cajero">Cajero</option>
+                      <option value="vendedor">Vendedor</option>
+                      <option value="cliente">Cliente</option>
                     </select>
                   </div>
                   <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
@@ -144,7 +129,7 @@ if (!isset($_SESSION["nombre"])) {
                   </div>
                   <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                     <label>Imagen:</label>
-                    <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg">
+                    <input type="file" class="form-control" name="imagen" id="imagen" accept=".jpg,.jpeg,.png,.jfif,.bmp">
                     <input type="hidden" name="imagenactual" id="imagenactual">
                     <img src="" width="150px" id="imagenmuestra" style="display: none;">
                   </div>

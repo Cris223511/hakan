@@ -53,7 +53,7 @@ switch ($_GET["op"]) {
 			$targetFile = $uploadDirectory . $newFileName;
 
 			// Verificar si es una imagen y mover el archivo
-			$allowedExtensions = array('jpg', 'jpeg', 'png');
+			$allowedExtensions = array('jpg', 'jpeg', 'png', 'jfif', 'bmp');
 			if (in_array($fileExtension, $allowedExtensions) && move_uploaded_file($tempFile, $targetFile)) {
 				// El archivo se ha movido correctamente, ahora $newFileName contiene el nombre del archivo
 				$imagen = $newFileName;
@@ -178,11 +178,7 @@ switch ($_GET["op"]) {
 
 		function mostrarBoton($reg, $cargo, $idusuario, $buttonType)
 		{
-			if (($reg != "superadmin" && $reg != "admin_total") && $cargo == "admin") {
-				return $buttonType;
-			} elseif ($reg != "superadmin" && $cargo == "admin_total") {
-				return $buttonType;
-			} elseif ($cargo == "superadmin" || ($cargo == "cajero" && $idusuario == $_SESSION["idusuario"])) {
+			if ($cargo == "superadmin" || ($cargo == "vendedor" && $idusuario == $_SESSION["idusuario"])) {
 				return $buttonType;
 			} else {
 				return '';

@@ -1,8 +1,8 @@
     <footer class="main-footer">
       <div class="pull-right hidden-xs">
-        <b>Version</b> 4.0.2
+        <b>Version</b> 5.0.0
       </div>
-      <strong>Copyright &copy; 2024 <a href="escritorio.php" style="color: #002a8e;">Sistema de ventas</a>.</strong> Todos los derechos reservados.
+      <strong>Copyright &copy; 2024 <a href="escritorio.php" style="color: #002a8e;">Hakan Importa S.A.C</a>.</strong> Todos los derechos reservados.
     </footer>
     <!-- jQuery -->
     <script src="../public/js/jquery-3.1.1.min.js"></script>
@@ -44,7 +44,7 @@
     </script>
 
     <script>
-      $('#imagen,#imagen2').on('change', function() {
+      $('#imagen, #imagen2').on('change', function() {
         const file = this.files[0];
         const maxSizeMB = 3;
         const maxSizeBytes = maxSizeMB * 1024 * 1024;
@@ -60,7 +60,7 @@
 
         // Validar tipo
         if (!allowedTypes.includes(file.type)) {
-          bootbox.alert('El archivo debe ser una imagen de tipo JPG, JPEG, PNG, GIF o BMP.');
+          bootbox.alert('El archivo debe ser una imagen de tipo JPG, JPEG, PNG, JFIF o BMP.');
           $(this).val('');
           $('#imagenmuestra').attr('src', '').hide();
           return;
@@ -499,7 +499,7 @@
     <script>
       function mostrarOcultarColumnaAlmacen() {
         <?php
-        $mostrarColumna = ($_SESSION["cargo"] == "superadmin" || $_SESSION["cargo"] == "admin_total");
+        $mostrarColumna = ($_SESSION["cargo"] == "admin");
 
         $script = '';
 

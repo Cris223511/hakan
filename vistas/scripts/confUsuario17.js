@@ -1,6 +1,3 @@
-objSelects = {};
-let select = $("#idlocal"); // select
-
 //Función que se ejecuta al inicio
 function init() {
 	$("#formulario").on("submit", function (e) {
@@ -9,36 +6,6 @@ function init() {
 
 	$('#mPerfilUsuario').addClass("treeview active");
 	$('#lConfUsuario').addClass("active");
-
-	// Cargamos los items al select "local principal"
-	$.post("../ajax/locales.php?op=selectLocales", function (data) {
-		// console.log(data);
-		objSelects = JSON.parse(data);
-		console.log(objSelects);
-		if (objSelects.length != 0) {
-			objSelects.locales.forEach(function (opcion) {
-				select.append('<option value="' + opcion.idlocal + '" data-local-ruc="' + opcion.local_ruc + '">' + opcion.titulo + '</option>');
-			});
-			select.selectpicker('refresh');
-			mostrar();
-		} else {
-			console.log("no hay datos =)")
-			mostrar();
-		}
-	});
-}
-
-function actualizarRUC() {
-	const select = document.getElementById("idlocal");
-	const localRUCInput = document.getElementById("local_ruc");
-	const selectedOption = select.options[select.selectedIndex];
-
-	if (selectedOption.value !== "") {
-		const localRUC = selectedOption.getAttribute('data-local-ruc');
-		localRUCInput.value = localRUC;
-	} else {
-		localRUCInput.value = "";
-	}
 }
 
 function guardaryeditar(e) {
@@ -74,7 +41,6 @@ function actualizarInfoUsuario() {
 			console.log(data)
 			// actualizar la imagen y el nombre del usuario en la cabecera
 			$('.user-image, .img-circle').attr('src', '../files/usuarios/' + data.imagen);
-			$('.user-menu .local').html('<strong> Local: ' + data.local + '</strong>');
 			$('.user-menu .user').html(data.nombre + ' - ' + '<strong> Rol: ' + data.cargo + '</strong>');
 			$("#imagenmuestra").attr("src", "../files/usuarios/" + data.imagen);
 		}
@@ -92,12 +58,10 @@ function mostrar() {
 		$("#direccion").val(data.direccion);
 		$("#telefono").val(data.telefono);
 		$("#email").val(data.email);
-		$("#idlocal").val(data.idlocal);
-		$("#idlocal").selectpicker('refresh');
-		$("#local_ruc").val(data.local_ruc);
 		$("#login").val(data.login);
 		$("#clave").val(data.clave);
 		$("#imagenmuestra").attr("src", "../files/usuarios/" + data.imagen);
+		$("#imagenmuestra").show();
 		$("#imagenactual").val(data.imagen);
 	});
 }

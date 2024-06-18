@@ -9,7 +9,6 @@ $perfil = new Perfiles();
 
 $idreporte = isset($_POST["idreporte"]) ? limpiarCadena($_POST["idreporte"]) : "";
 $titulo = isset($_POST["titulo"]) ? limpiarCadena($_POST["titulo"]) : "";
-$auspiciado = isset($_POST["auspiciado"]) ? limpiarCadena($_POST["auspiciado"]) : "";
 $ruc = isset($_POST["ruc"]) ? limpiarCadena($_POST["ruc"]) : "";
 $direccion = isset($_POST["direccion"]) ? limpiarCadena($_POST["direccion"]) : "";
 $telefono = isset($_POST["telefono"]) ? limpiarCadena($_POST["telefono"]) : "";
@@ -32,7 +31,7 @@ switch ($_GET["op"]) {
 					$targetFile = $uploadDirectory . $newFileName;
 
 					// Verificar si es una imagen y mover el archivo
-					$allowedExtensions = array('jpg', 'jpeg', 'png');
+					$allowedExtensions = array('jpg', 'jpeg', 'png', 'jfif', 'bmp');
 					if (in_array($fileExtension, $allowedExtensions) && move_uploaded_file($tempFile, $targetFile)) {
 						// El archivo se ha movido correctamente, ahora $newFileName contiene el nombre del archivo
 						$imagen = $newFileName;
@@ -46,7 +45,7 @@ switch ($_GET["op"]) {
 					$imagen = $_POST["imagenactual"];
 				}
 
-				$rspta = $perfil->actualizarBoleta($idreporte, $titulo, $ruc, $direccion, $telefono, $email, $auspiciado, $imagen);
+				$rspta = $perfil->actualizarBoleta($idreporte, $titulo, $ruc, $direccion, $telefono, $email, $imagen);
 				echo $rspta ? "Boleta actualizado correctamente" : "Boleta no se pudo actualizar";
 			} else {
 				require 'noacceso.php';

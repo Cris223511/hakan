@@ -20,11 +20,9 @@ if (!isset($_SESSION["nombre"])) {
             </div>
             <div class="panel-body">
               <h4><strong>Soporte: </strong></h4>
-              <p>Si necesitas ayuda o más información, contáctate con nosotros llamando al <strong>+51 937 075 845</strong></p>
+              <p>Si necesitas ayuda o más información, contáctate con nosotros llamando al <strong>+51 992 719 552</strong></p>
               <h4><strong>Empresa: </strong></h4>
-              <p>Sistema de ventas S.A.C.</p>
-              <h4><strong>Desarrollado por: </strong></h4>
-              <p>SistemaDeVentas@gmail.com</p>
+              <p>Hakan Importa S.A.C.</p>
             </div>
           </div>
         </div>

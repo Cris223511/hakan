@@ -76,7 +76,7 @@ if (!isset($_SESSION["nombre"])) {
               <div class="box-header with-border">
                 <h1 class="box-title">Productos
                   <!-- <button class="btn btn-bcp" id="btnagregar" onclick="mostrarform(true)"><i class="fa fa-plus-circle"></i> Agregar</button> -->
-                  <?php if ($_SESSION["cargo"] == "superadmin" || $_SESSION["cargo"] == "admin_total") { ?>
+                  <?php if ($_SESSION["cargo"] == "admin") { ?>
                     <a href="../reportes/rptarticulos.php" target="_blank">
                       <button class="btn btn-secondary" style="color: black !important;">
                         <i class="fa fa-clipboard"></i> Reporte
@@ -229,7 +229,7 @@ if (!isset($_SESSION["nombre"])) {
                       </div>
                       <div class="form-group col-lg-4 col-md-6 col-sm-12">
                         <label>Imagen:</label>
-                        <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg">
+                        <input type="file" class="form-control" name="imagen" id="imagen" accept=".jpg,.jpeg,.png,.jfif,.bmp">
                         <input type="hidden" name="imagenactual" id="imagenactual">
                       </div>
                       <div class="form-group col-lg-6 col-md-6 col-sm-12">
