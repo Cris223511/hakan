@@ -1,5 +1,22 @@
 var tabla;
 
+var idlocal = 0;
+
+function actualizarCorrelativo(idlocal) {
+	$.post("../ajax/articulo.php?op=getLastCodigo", { idlocal: idlocal.value }, function (num) {
+		console.log(num);
+		const partes = num.match(/([a-zA-Z]+)(\d+)/) || ["", "", ""];
+
+		const letras = partes[1];
+		const numeros = partes[2];
+
+		const siguienteCorrelativo = generarSiguienteCorrelativo(numeros);
+
+		$("#cod_part_1").val(letras);
+		$("#cod_part_2").val(siguienteCorrelativo);
+	});
+}
+
 //Función que se ejecuta al inicio
 function init() {
 	mostrarform(false);
@@ -7,6 +24,10 @@ function init() {
 
 	$("#formulario").on("submit", function (e) {
 		guardaryeditar(e);
+	})
+
+	$("#formulario2").on("submit", function (e) {
+		guardaryeditar2(e);
 	})
 
 	$("#imagenmuestra").hide();
@@ -106,7 +127,6 @@ function agregarCategoria(e) {
 
 				success: function (datos) {
 					datos = limpiarCadena(datos);
-					datos = limpiarCadena(datos);
 					if (!datos) {
 						console.log("No se recibieron datos del servidor.");
 						return;
@@ -144,7 +164,6 @@ function agregarMarca(e) {
 				processData: false,
 
 				success: function (datos) {
-					datos = limpiarCadena(datos);
 					datos = limpiarCadena(datos);
 					if (!datos) {
 						console.log("No se recibieron datos del servidor.");
@@ -184,7 +203,6 @@ function agregarMedida(e) {
 
 				success: function (datos) {
 					datos = limpiarCadena(datos);
-					datos = limpiarCadena(datos);
 					if (!datos) {
 						console.log("No se recibieron datos del servidor.");
 						return;
@@ -204,6 +222,17 @@ function agregarMedida(e) {
 	}
 }
 
+function changeGanancia() {
+	let precio_venta = $("#precio_venta").val();
+	let precio_compra = $("#precio_compra").val();
+
+	// Verificar si ambos campos están llenos
+	if (precio_venta !== '' && precio_compra !== '') {
+		let ganancia = precio_venta - precio_compra;
+		$("#ganancia").val(ganancia.toFixed(2));
+	}
+}
+
 function actualizarRUC() {
 	const selectLocal = document.getElementById("idlocal");
 	const localRUCInput = document.getElementById("local_ruc");
@@ -219,8 +248,9 @@ function actualizarRUC() {
 
 //Función limpiar
 function limpiar() {
-	$("#codigo").val("");
-	$("#codigo_producto").val("");
+	$("#codigo_barra").val("");
+	$("#cod_part_1").val("");
+	$("#cod_part_2").val("");
 	$("#nombre").val("");
 	$("#local_ruc").val("");
 	$("#descripcion").val("");
@@ -235,6 +265,7 @@ function limpiar() {
 	$("#imagen").val("");
 	$("#precio_compra").val("");
 	$("#precio_venta").val("");
+	$("#ganancia").val("0.00");
 	$("#comision").val("");
 	$("#print").hide();
 	$("#idarticulo").val("");
@@ -251,6 +282,8 @@ function limpiar() {
 
 	$(".btn1").show();
 	$(".btn2").hide();
+
+	detenerEscaneo();
 }
 
 //Función mostrar formulario
@@ -261,6 +294,7 @@ function mostrarform(flag) {
 		$("#formularioregistros").show();
 		$("#btnGuardar").prop("disabled", false);
 		$("#btnagregar").hide();
+		$("#btncomisiones").hide();
 		$(".caja1").hide();
 		$(".caja2").removeClass("col-lg-10 col-md-8 col-sm-12").addClass("col-lg-12 col-md-12 col-sm-12");
 		$(".botones").removeClass("col-lg-10 col-md-8 col-sm-12").addClass("col-lg-12 col-md-12 col-sm-12");
@@ -272,6 +306,7 @@ function mostrarform(flag) {
 		$(".listadoregistros").show();
 		$("#formularioregistros").hide();
 		$("#btnagregar").show();
+		$("#btncomisiones").show();
 		$(".caja1").show();
 		$(".caja2").removeClass("col-lg-12 col-md-12 col-sm-12").addClass("col-lg-10 col-md-8 col-sm-12");
 		$(".botones").removeClass("col-lg-12 col-md-12 col-sm-12").addClass("col-lg-10 col-md-8 col-sm-12");
@@ -301,10 +336,10 @@ function listar() {
 
 	tabla = $('#tbllistado').dataTable(
 		{
-			"lengthMenu": [5, 10, 25, 75, 100],//mostramos el menú de registros a revisar
-			"aProcessing": true,//Activamos el procesamiento del datatables
-			"aServerSide": true,//Paginación y filtrado realizados por el servidor
-			dom: '<Bl<f>rtip>',//Definimos los elementos del control de tabla
+			"lengthMenu": [5, 10, 25, 75, 100],
+			"aProcessing": true,
+			"aServerSide": true,
+			dom: '<Bl<f>rtip>',
 			buttons: [
 				'copyHtml5',
 				'excelHtml5',
@@ -347,16 +382,17 @@ function listar() {
 			"iDisplayLength": 5,//Paginación
 			"order": [],
 			"createdRow": function (row, data, dataIndex) {
-				$(row).find('td:eq(0), td:eq(1), td:eq(2), td:eq(3), td:eq(4), td:eq(5), td:eq(6), td:eq(7), td:eq(8), td:eq(9), td:eq(10), td:eq(11, td:eq(12), td:eq(13), td:eq(14), td:eq(15)').addClass('nowrap-cell');
+				// $(row).find('td:eq(0), td:eq(1), td:eq(3), td:eq(4), td:eq(5), td:eq(6), td:eq(7), td:eq(8), td:eq(9), td:eq(10), td:eq(11, td:eq(12), td:eq(13), td:eq(14), td:eq(15)').addClass('nowrap-cell');
 			}
 		}).DataTable();
 }
+
 //Función para guardar o editar
 
 function guardaryeditar(e) {
 	e.preventDefault(); //No se activará la acción predeterminada del evento
 
-	var codigoBarra = $("#codigo").val();
+	var codigoBarra = $("#codigo_barra").val();
 
 	var formatoValido = /^[0-9]{1} [0-9]{2} [0-9]{4} [0-9]{1} [0-9]{4} [0-9]{1}$/.test(codigoBarra);
 
@@ -366,13 +402,13 @@ function guardaryeditar(e) {
 		return;
 	}
 
-	var stock = parseFloat($("#stock").val());
-	var stock_minimo = parseFloat($("#stock_minimo").val());
+	// var stock = parseFloat($("#stock").val());
+	// var stock_minimo = parseFloat($("#stock_minimo").val());
 
-	if (stock_minimo > stock) {
-		bootbox.alert("El stock mínimo no puede ser mayor que el stock normal.");
-		return;
-	}
+	// if (stock_minimo > stock) {
+	// 	bootbox.alert("El stock mínimo no puede ser mayor que el stock normal.");
+	// 	return;
+	// }
 
 	var precio_compra = parseFloat($("#precio_compra").val());
 	var precio_venta = parseFloat($("#precio_venta").val());
@@ -383,13 +419,26 @@ function guardaryeditar(e) {
 	}
 
 	$("#btnGuardar").prop("disabled", true);
+	$("#ganancia").prop("disabled", false);
+
+	formatearNumeroCorrelativo();
+
+	var parteLetras = $("#cod_part_1").val();
+	var parteNumeros = $("#cod_part_2").val();
+	var codigoCompleto = parteLetras + parteNumeros;
+
 	var formData = new FormData($("#formulario")[0]);
+	formData.append("codigo_producto", codigoCompleto);
+
+	$("#ganancia").prop("disabled", true);
 
 	let detalles = frmDetallesVisible() ? obtenerDetalles() : { talla: '', color: '', idmedida: '0', peso: '0.00' };
 
 	for (let key in detalles) {
 		formData.append(key, detalles[key]);
 	}
+
+	$("#idlocal").attr("onchange", "actualizarRUC();");
 
 	$.ajax({
 		url: "../ajax/articulo.php?op=guardaryeditar",
@@ -400,7 +449,7 @@ function guardaryeditar(e) {
 
 		success: function (datos) {
 			datos = limpiarCadena(datos);
-			if (datos == "El código de barra del producto que ha ingresado ya existe." || datos == "El código del producto que ha ingresado ya existe.") {
+			if (datos == "El código de barra del producto que ha ingresado ya existe." || datos == "El código del producto que ha ingresado ya existe en el local seleccionado.") {
 				bootbox.alert(datos);
 				$("#btnGuardar").prop("disabled", false);
 				return;
@@ -455,8 +504,16 @@ function mostrar(idarticulo) {
 		$('#idmarca').selectpicker('refresh');
 		$("#idmedida").val(data.idmedida);
 		$('#idmedida').selectpicker('refresh');
-		$("#codigo").val(data.codigo);
-		$("#codigo_producto").val(data.codigo_producto);
+		$("#codigo_barra").val(data.codigo);
+
+		const partes = data.codigo_producto.match(/([a-zA-Z]+)(\d+)/) || ["", "", ""];
+
+		const letras = partes[1];
+		const numeros = partes[2];
+
+		$("#cod_part_1").val(letras);
+		$("#cod_part_2").val(numeros);
+
 		$("#nombre").val(data.nombre);
 		$("#stock").val(data.stock);
 		$("#stock_minimo").val(data.stock_minimo);
@@ -468,17 +525,55 @@ function mostrar(idarticulo) {
 		$("#imagenmuestra").attr("src", "../files/articulos/" + data.imagen);
 		$("#precio_compra").val(data.precio_compra);
 		$("#precio_venta").val(data.precio_venta);
+		$("#ganancia").val(data.ganancia);
 		$("#comision").val(data.comision);
 		$("#imagenactual").val(data.imagen);
 		$("#idarticulo").val(data.idarticulo);
 		generarbarcode(0);
 		actualizarRUC();
+
+		$("#idlocal").attr("onchange", "actualizarRUC(); actualizarCorrelativo(this);");
 	})
+}
+
+function limpiarModalComision() {
+	$("#comision2").val("");
+	$("#btnGuardarComision").prop("disabled", false);
+}
+
+function verificarModalComision() {
+	bootbox.confirm("¿Está seguro de modificar la comisión de todos los productos?", function (result) {
+		if (result) {
+			$("#formulario2").submit();
+		}
+	})
+}
+
+function guardaryeditar2(e) {
+	e.preventDefault(); //No se activará la acción predeterminada del evento
+	$("#btnGuardarComision").prop("disabled", true);
+	var formData = new FormData($("#formulario2")[0]);
+
+	$.ajax({
+		url: "../ajax/articulo.php?op=guardarComision",
+		type: "POST",
+		data: formData,
+		contentType: false,
+		processData: false,
+
+		success: function (datos) {
+			datos = limpiarCadena(datos);
+			limpiarModalComision();
+			bootbox.alert(datos);
+			$('#myModal').modal('hide');
+			tabla.ajax.reload();
+		}
+	});
 }
 
 //Función para desactivar registros
 function desactivar(idarticulo) {
-	bootbox.confirm("¿Está Seguro de desactivar el producto?", function (result) {
+	bootbox.confirm("¿Está seguro de desactivar el producto?", function (result) {
 		if (result) {
 			$.post("../ajax/articulo.php?op=desactivar", { idarticulo: idarticulo }, function (e) {
 				bootbox.alert(e);
@@ -490,7 +585,7 @@ function desactivar(idarticulo) {
 
 //Función para activar registros
 function activar(idarticulo) {
-	bootbox.confirm("¿Está Seguro de activar el producto?", function (result) {
+	bootbox.confirm("¿Está seguro de activar el producto?", function (result) {
 		if (result) {
 			$.post("../ajax/articulo.php?op=activar", { idarticulo: idarticulo }, function (e) {
 				bootbox.alert(e);
@@ -550,10 +645,10 @@ function buscar() {
 
 	tabla = $('#tbllistado').dataTable(
 		{
-			"lengthMenu": [5, 10, 25, 75, 100],//mostramos el menú de registros a revisar
-			"aProcessing": true,//Activamos el procesamiento del datatables
-			"aServerSide": true,//Paginación y filtrado realizados por el servidor
-			dom: '<Bl<f>rtip>',//Definimos los elementos del control de tabla
+			"lengthMenu": [5, 10, 25, 75, 100],
+			"aProcessing": true,
+			"aServerSide": true,
+			dom: '<Bl<f>rtip>',
 			buttons: [
 				'copyHtml5',
 				'excelHtml5',
@@ -596,7 +691,7 @@ function buscar() {
 			"iDisplayLength": 5,//Paginación
 			"order": [],
 			"createdRow": function (row, data, dataIndex) {
-				$(row).find('td:eq(0), td:eq(1), td:eq(2), td:eq(3), td:eq(4), td:eq(5), td:eq(6), td:eq(7), td:eq(8), td:eq(9), td:eq(10), td:eq(11), td:eq(12), td:eq(13), td:eq(14), td:eq(15)').addClass('nowrap-cell');
+				// $(row).find('td:eq(0), td:eq(1), td:eq(3), td:eq(4), td:eq(5), td:eq(6), td:eq(7), td:eq(8), td:eq(9), td:eq(10), td:eq(11), td:eq(12), td:eq(13), td:eq(14), td:eq(15)').addClass('nowrap-cell');
 			}
 		}).DataTable();
 }
@@ -604,34 +699,44 @@ function buscar() {
 var quaggaIniciado = false;
 
 function escanear() {
-	$(".btn1").hide();
-	$(".btn2").show();
-	$("#camera").show();
 
-	Quagga.init({
-		inputStream: {
-			name: "Live",
-			type: "LiveStream",
-			target: document.querySelector('#camera')    // Or '#yourElement' (optional)
-		},
-		decoder: {
-			readers: ["code_128_reader"]
-		}
-	}, function (err) {
-		if (err) {
-			console.log(err);
-			return
-		}
-		console.log("Initialization finished. Ready to start");
-		Quagga.start();
-		quaggaIniciado = true;
-	});
+	// Intentar acceder a la cámara
+	navigator.mediaDevices.getUserMedia({ video: true })
+		.then(function (stream) {
+			$(".btn1").hide();
+			$(".btn2").show();
 
-	Quagga.onDetected(function (data) {
-		console.log(data.codeResult.code);
-		var codigoBarra = data.codeResult.code;
-		document.getElementById('codigo').value = codigoBarra;
-	});
+			// Acceso a la cámara exitoso, inicializa Quagga
+			Quagga.init({
+				inputStream: {
+					name: "Live",
+					type: "LiveStream",
+					target: document.querySelector('#camera')
+				},
+				decoder: {
+					readers: ["code_128_reader"]
+				}
+			}, function (err) {
+				if (err) {
+					console.log(err);
+					return;
+				}
+				console.log("Initialization finished. Ready to start");
+				Quagga.start();
+				quaggaIniciado = true;
+			});
+
+			$("#camera").show();
+
+			Quagga.onDetected(function (data) {
+				console.log(data.codeResult.code);
+				var codigoBarra = data.codeResult.code;
+				document.getElementById('codigo').value = codigoBarra;
+			});
+		})
+		.catch(function (error) {
+			bootbox.alert("No se encontró una cámara conectada.");
+		});
 }
 
 function detenerEscaneo() {
@@ -645,12 +750,12 @@ function detenerEscaneo() {
 	}
 }
 
-$("#codigo").on("input", function () {
+$("#codigo_barra").on("input", function () {
 	formatearNumero();
 });
 
 function formatearNumero() {
-	var codigo = $("#codigo").val().replace(/\s/g, '').replace(/\D/g, '');
+	var codigo = $("#codigo_barra").val().replace(/\s/g, '').replace(/\D/g, '');
 	var formattedCode = '';
 
 	for (var i = 0; i < codigo.length; i++) {
@@ -661,18 +766,18 @@ function formatearNumero() {
 		formattedCode += codigo[i];
 	}
 
-	var maxLength = parseInt($("#codigo").attr("maxlength"));
+	var maxLength = parseInt($("#codigo_barra").attr("maxlength"));
 	if (formattedCode.length > maxLength) {
 		formattedCode = formattedCode.substring(0, maxLength);
 	}
 
-	$("#codigo").val(formattedCode);
+	$("#codigo_barra").val(formattedCode);
 	generarbarcode(0);
 }
 
 function borrar() {
-	$("#codigo").val("");
-	$("#codigo").focus();
+	$("#codigo_barra").val("");
+	$("#codigo_barra").focus();
 	$("#print").hide();
 }
 
@@ -683,7 +788,7 @@ function generar() {
 	codigo += Math.floor(Math.random() * 10) + " ";
 	codigo += generarNumero(100, 9) + " ";
 	codigo += Math.floor(Math.random() * 10);
-	$("#codigo").val(codigo);
+	$("#codigo_barra").val(codigo);
 	generarbarcode(1);
 }
 
@@ -697,7 +802,7 @@ function generarNumero(max, min) {
 function generarbarcode(param) {
 
 	if (param == 1) {
-		var codigo = $("#codigo").val().replace(/\s/g, '');
+		var codigo = $("#codigo_barra").val().replace(/\s/g, '');
 		console.log(codigo.length);
 
 		if (!/^\d+$/.test(codigo)) {
@@ -710,12 +815,12 @@ function generarbarcode(param) {
 			codigo = codigo.slice(0, 1) + " " + codigo.slice(1, 3) + " " + codigo.slice(3, 7) + " " + codigo.slice(7, 8) + " " + codigo.slice(8, 12) + " " + codigo.slice(12, 13);
 		}
 	} else {
-		var codigo = $("#codigo").val()
+		var codigo = $("#codigo_barra").val()
 	}
 
 	if (codigo != "") {
 		JsBarcode("#barcode", codigo);
-		$("#codigo").val(codigo);
+		$("#codigo_barra").val(codigo);
 		$("#print").show();
 	} else {
 		$("#print").hide();
@@ -723,7 +828,7 @@ function generarbarcode(param) {
 }
 
 function convertirMayus() {
-	var inputCodigo = document.getElementById("codigo_producto");
+	var inputCodigo = document.getElementById("cod_part_1");
 	inputCodigo.value = inputCodigo.value.toUpperCase();
 }
 

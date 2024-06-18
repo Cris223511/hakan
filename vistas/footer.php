@@ -1,8 +1,8 @@
     <footer class="main-footer">
       <div class="pull-right hidden-xs">
-        <b>Version</b> 4.0.0
+        <b>Version</b> 4.0.2
       </div>
-      <strong>Copyright &copy; 2024 <a href="escritorio.php" style="color: #002a8e;">Sistema de Peluquería</a>.</strong> Todos los derechos reservados.
+      <strong>Copyright &copy; 2024 <a href="escritorio.php" style="color: #002a8e;">Sistema de ventas</a>.</strong> Todos los derechos reservados.
     </footer>
     <!-- jQuery -->
     <script src="../public/js/jquery-3.1.1.min.js"></script>
@@ -10,6 +10,8 @@
     <script src="../public/js/bootstrap.min.js"></script>
     <!-- AdminLTE App -->
     <script src="../public/js/app.min.js"></script>
+    <!-- Quagga JS -->
+    <script src="../public/js/quagga.min.js"></script>
     <!-- Lightbox JS -->
     <script src="../public/glightbox/js/glightbox.min.js"></script>
 
@@ -39,6 +41,37 @@
 
     <script>
       $('[data-toggle="popover"]').popover();
+    </script>
+
+    <script>
+      $('#imagen,#imagen2').on('change', function() {
+        const file = this.files[0];
+        const maxSizeMB = 3;
+        const maxSizeBytes = maxSizeMB * 1024 * 1024;
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp'];
+
+        // Validar tamaño
+        if (file.size > maxSizeBytes) {
+          bootbox.alert(`El archivo es demasiado grande. El tamaño máximo permitido es de ${maxSizeMB} MB.`);
+          $(this).val('');
+          $('#imagenmuestra').attr('src', '').hide();
+          return;
+        }
+
+        // Validar tipo
+        if (!allowedTypes.includes(file.type)) {
+          bootbox.alert('El archivo debe ser una imagen de tipo JPG, JPEG, PNG, GIF o BMP.');
+          $(this).val('');
+          $('#imagenmuestra').attr('src', '').hide();
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          $('#imagenmuestra').attr('src', e.target.result).show();
+        };
+        reader.readAsDataURL(file);
+      });
     </script>
 
     <script>
@@ -191,6 +224,50 @@
         if (e.key === "-")
           e.preventDefault();
       }
+
+      function nowrapCell() {
+        ["#tbllistado", "#detalles", "#tbllistado2", "#tbllistado3", "#tblarticulos", "#tbldetalles", "#tbldetalles2"].forEach(selector => {
+          addClassToCells(selector, "nowrap-cell");
+        });
+      }
+
+      function addClassToCells(selector, className) {
+        var table = document.querySelector(selector);
+
+        if (!table) return;
+
+        var columnIndices = Array.from(table.querySelectorAll("th")).reduce((indices, th, index) => {
+          if (["CLIENTE", "PROVEEDOR", "NOMBRE", "NOMBRES", "DESCRIPCIÓN", "DESCRIPCIÓN DEL LOCAL", "ALMACÉN"].includes(th.innerText.trim())) {
+            indices.push(index);
+          }
+          return indices;
+        }, []);
+
+        table.querySelectorAll("td, th").forEach((cell, index) => {
+          var cellIndex = index % table.rows[0].cells.length;
+          if (!columnIndices.includes(cellIndex)) {
+            cell.classList.add(className);
+          }
+        });
+      }
+
+      $(document).on('draw.dt', function(e, settings) {
+        if ($(settings.nTable).is('#tbllistado') || $(settings.nTable).is('#detalles') || $(settings.nTable).is('#tbllistado2') || $(settings.nTable).is('#tbllistado3') || $(settings.nTable).is('#tblarticulos') || $(settings.nTable).is('#tbldetalles') || $(settings.nTable).is('#tbldetalles2')) {
+          const table = $(settings.nTable).DataTable();
+          if (table.rows({
+              page: 'current'
+            }).count() > 0) {
+            inicializeGLightbox();
+            nowrapCell();
+          }
+        }
+      });
+
+      $(document).ajaxSuccess(function(event, xhr, settings) {
+        if (settings.url.includes("op=listar") || settings.url.includes("op=listarDetalle")) {
+          nowrapCell();
+        }
+      });
     </script>
 
     <script>
@@ -317,13 +394,18 @@
       }
 
       function limpiarCadena(cadena) {
+        if (typeof cadena === 'object' && cadena !== null) {
+          return cadena;
+        }
+
         let cadenaLimpia = cadena.trim();
         cadenaLimpia = cadenaLimpia.replace(/^[\n\r]+/, '');
         return cadenaLimpia;
       }
 
-      function formatearNumero() {
-        var campos = ["#codigo"];
+      function formatearNumeroCorrelativo() {
+        console.log("entro =)");
+        var campos = ["#codigo", "#cod_part_2"];
 
         campos.forEach(function(campo) {
           let numValor = $(campo).val();
@@ -417,31 +499,23 @@
     <script>
       function mostrarOcultarColumnaAlmacen() {
         <?php
-        // Verificar el rol del usuario
         $mostrarColumna = ($_SESSION["cargo"] == "superadmin" || $_SESSION["cargo"] == "admin_total");
 
-        // Script JavaScript para mostrar u ocultar la columna
         $script = '';
 
         if (!$mostrarColumna) {
           $script .= '
-            // Obtener la tabla
             var tabla = document.getElementById("detallesProductosPrecuenta");
-
-            // Obtener el índice de la columna del almacén
             var indiceColumnaAlmacen = 2;
 
-            // Ocultar la cabecera
             tabla.rows[0].cells[indiceColumnaAlmacen].style.display = "none";
 
-            // Ocultar el cuerpo
             for (var i = 0; i < tabla.rows.length; i++) {
                 tabla.rows[i].cells[indiceColumnaAlmacen].style.display = "none";
             }
         ';
         }
 
-        // Imprimir el script JavaScript
         echo $script;
         ?>
       }

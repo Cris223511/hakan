@@ -41,11 +41,11 @@ if (!isset($_SESSION["nombre"])) {
                 <table id="tbllistado" class="table table-striped table-bordered table-condensed table-hover w-100" style="width: 100% !important">
                   <thead>
                     <th style="width: 1%;">Opciones</th>
+                    <th style="width: 20%; min-width: 180px;">Nombre</th>
                     <th>Usuario</th>
                     <th>Cargo</th>
-                    <th>Almacén</th>
+                    <th style="width: 15%; min-width: 220px;">Almacén</th>
                     <th>RUC del local</th>
-                    <th>Nombre</th>
                     <th>Documento</th>
                     <th>Número Doc.</th>
                     <th>Teléfono</th>
@@ -57,11 +57,11 @@ if (!isset($_SESSION["nombre"])) {
                   </tbody>
                   <tfoot>
                     <th>Opciones</th>
+                    <th>Nombre</th>
                     <th>Usuario</th>
                     <th>Cargo</th>
                     <th>Almacén</th>
                     <th>RUC del local</th>
-                    <th>Nombre</th>
                     <th>Documento</th>
                     <th>Número Doc.</th>
                     <th>Teléfono</th>
@@ -103,7 +103,7 @@ if (!isset($_SESSION["nombre"])) {
                   </div>
                   <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                     <label>Dirección:</label>
-                    <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Dirección" maxlength="40">
+                    <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Dirección" maxlength="80">
                   </div>
                   <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                     <label>Teléfono:</label>
@@ -117,6 +117,9 @@ if (!isset($_SESSION["nombre"])) {
                     <label>Cargo(*):</label>
                     <select name="cargo" id="cargo" class="form-control selectpicker" required>
                       <option value="admin">Administrador</option>
+                      <?php if ($_SESSION["cargo"] == "superadmin") { ?>
+                        <option value="admin_total">Admin Total</option>
+                      <?php } ?>
                       <option value="cajero">Cajero</option>
                     </select>
                   </div>
@@ -143,7 +146,7 @@ if (!isset($_SESSION["nombre"])) {
                     <label>Imagen:</label>
                     <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg">
                     <input type="hidden" name="imagenactual" id="imagenactual">
-                    <img src="" width="150px" id="imagenmuestra">
+                    <img src="" width="150px" id="imagenmuestra" style="display: none;">
                   </div>
                   <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <button class="btn btn-warning" onclick="cancelarform()" type="button"><i class="fa fa-arrow-circle-left"></i> Cancelar</button>

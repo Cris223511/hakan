@@ -13,6 +13,63 @@ if (!isset($_SESSION["nombre"])) {
 ?>
     <link rel="stylesheet" href="../public/css/jquery.gScrollingCarousel.css">
     <style>
+      @media (max-width: 991px) {
+        .caja1 {
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        .caja1 .contenedor {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+          gap: 15px;
+        }
+
+        .caja1 .contenedor img {
+          width: 25% !important;
+        }
+
+        .contenedor_articulos {
+          display: flex;
+          flex-direction: column-reverse !important;
+        }
+      }
+
+      @media (max-width: 767px) {
+        .botones {
+          width: 100% !important;
+        }
+
+        #label {
+          display: none;
+        }
+      }
+
+      #camera video {
+        width: 250px;
+        height: auto;
+        border-radius: 15px;
+        margin-top: 10px;
+      }
+
+      #camera canvas.drawingBuffer {
+        height: auto;
+        position: absolute;
+      }
+
+      .contenedor_articulos .form-control,
+      .contenedor_articulos .form-control button {
+        height: 45px !important;
+        font-size: 16px !important;
+        align-content: center;
+      }
+
+      [data-id="idlocal_session"] .filter-option {
+        font-weight: bold;
+      }
+
       #total_venta {
         background-color: #ebc513 !important;
         color: black !important;
@@ -335,8 +392,9 @@ if (!isset($_SESSION["nombre"])) {
 
       .caja-ventas button {
         margin-bottom: 10px;
-        width: 40px;
-        height: 30px;
+        width: 50px;
+        height: 35px;
+        font-size: 16px;
       }
 
       .g-scrolling-carousel .items>* {
@@ -356,12 +414,6 @@ if (!isset($_SESSION["nombre"])) {
       #detallesProductosPrecuenta input {
         width: 90px;
         height: 30px;
-      }
-
-      @media (max-width: 991.50px) {
-        .smallModal {
-          width: 90% !important;
-        }
       }
     </style>
 
@@ -385,6 +437,7 @@ if (!isset($_SESSION["nombre"])) {
                       </button>
                     </a>
                   <?php } ?>
+                  <!-- <a href="articulo_form.php"><button class="btn btn-warning" id="btnagregar"><i class="fa fa-cart-plus"></i> Agregar productos</button></a> -->
                   <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Ventas</strong>" data-html="true" data-content="Módulo para registrar las ventas de los productos, solo puede vender si la caja <strong>de su local</strong> está abierta.<br><br><strong>Nota:</strong> Al hacer la venta, el monto total de la venta aumentará a su caja. También, el stock del producto vendido se reduce (no puede vender productos con stock de 0)." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
                 </h1>
                 <div class="box-tools pull-right">
@@ -425,8 +478,8 @@ if (!isset($_SESSION["nombre"])) {
                     <thead>
                       <th style="width: 1%;">Opciones</th>
                       <th>PDF</th>
-                      <th>Cliente</th>
-                      <th>Almacén</th>
+                      <th style="width: 20%; min-width: 200px;">Cliente</th>
+                      <th style="width: 15%; min-width: 200px;">Almacén</th>
                       <th>Caja</th>
                       <th>Documento</th>
                       <th>Número Ticket</th>
@@ -513,7 +566,7 @@ if (!isset($_SESSION["nombre"])) {
                       <table id="detalles" class="table table-dark table-striped table-hover w-100" style="width: 100% !important;">
                         <thead>
                           <th>CÓDIGO</th>
-                          <th style="width: 30%; min-width: 130px; white-space: nowrap;">NOMBRE</th>
+                          <th style="width: 30%; min-width: 130px;">NOMBRE</th>
                           <th>PRECIO</th>
                           <th>DESCUENTO</th>
                           <th>CANTIDAD</th>
@@ -533,6 +586,7 @@ if (!isset($_SESSION["nombre"])) {
                       <div class="caja-ventas">
                         <!-- <a href="#"><button type="button" class="btn btn-default" style="padding-top: 4px;"><strong>%</strong></button></a> -->
                         <!-- <a href="#"><button type="button" class="btn btn-default"><i class="fa fa-money"></i></button></a> -->
+                        <a data-toggle="modal" href="#myModal12" onclick="limpiarModalArticulos();"><button type="button" class="btn btn-bcp"><i class="fa fa-shopping-cart"></i></button></a>
                         <a onclick="limpiarTodo();"><button type="button" class="btn btn-default"><i class="fa fa-trash"></i></button></a>
                         <!-- <a href="#"><button type="button" class="btn btn-default"><i class="fa fa-usd"></i></button></a> -->
                         <!-- <a href="#"><button type="button" class="btn btn-default"><i class="fa fa-cogs"></i></button></a> -->
@@ -540,8 +594,8 @@ if (!isset($_SESSION["nombre"])) {
                       </div>
                     </div>
                     <div id="comentarios" style="display: none;">
-                      <textarea type="text" class="form-control" id="comentario_interno_final" name="comentario_interno" maxlength="120" rows="4" autocomplete="off"></textarea>
-                      <textarea type="text" class="form-control" id="comentario_externo_final" name="comentario_externo" maxlength="120" rows="4" autocomplete="off"></textarea>
+                      <textarea type="text" class="form-control" id="comentario_interno_final" name="comentario_interno" maxlength="1000" rows="4" autocomplete="off"></textarea>
+                      <textarea type="text" class="form-control" id="comentario_externo_final" name="comentario_externo" maxlength="1000" rows="4" autocomplete="off"></textarea>
                     </div>
                     <select style="display: none;" id="idlocal_session_final" name="idlocal" class="form-control">
                       <option value="">- Seleccione -</option>
@@ -625,11 +679,11 @@ if (!isset($_SESSION["nombre"])) {
               </div>
               <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                 <label>Imagen(*):</label>
-                <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg" required>
+                <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg">
               </div>
               <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <label>Descripción:</label>
-                <textarea type="text" class="form-control" name="descripcion" id="descripcion" maxlength="150" rows="4" placeholder="Ingrese una descripción."></textarea>
+                <textarea type="text" class="form-control" name="descripcion" id="descripcion" maxlength="1000" rows="4" placeholder="Ingrese una descripción."></textarea>
               </div>
 
               <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-bottom: 0 !important; padding: 0 !important;">
@@ -681,7 +735,7 @@ if (!isset($_SESSION["nombre"])) {
               </div>
               <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                 <label>Dirección:</label>
-                <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección." maxlength="40" disabled>
+                <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección." maxlength="80" disabled>
               </div>
               <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                 <label>Teléfono:</label>
@@ -745,7 +799,7 @@ if (!isset($_SESSION["nombre"])) {
               </div>
               <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                 <label>Dirección:</label>
-                <input type="text" class="form-control" name="direccion" id="direccion2" placeholder="Ingrese la dirección." maxlength="40">
+                <input type="text" class="form-control" name="direccion" id="direccion2" placeholder="Ingrese la dirección." maxlength="80">
               </div>
               <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                 <label>Teléfono:</label>
@@ -811,7 +865,7 @@ if (!isset($_SESSION["nombre"])) {
               </div>
               <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                 <label>Dirección:</label>
-                <input type="text" class="form-control" name="direccion" id="direccion3" placeholder="Ingrese la dirección." maxlength="40">
+                <input type="text" class="form-control" name="direccion" id="direccion3" placeholder="Ingrese la dirección." maxlength="80">
               </div>
               <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                 <label>Teléfono:</label>
@@ -868,6 +922,7 @@ if (!isset($_SESSION["nombre"])) {
                       <th style="text-align: start !important;">CÓDIGO</th>
                       <th style="width: 30%; min-width: 130px; white-space: nowrap; text-align: start !important;">NOMBRE</th>
                       <th style="width: 30%; min-width: 130px; white-space: nowrap; text-align: start !important;">ALMACÉN</th>
+                      <th>STOCK</th>
                       <th>PRECIO</th>
                       <th>DESCUENTO</th>
                       <th>CANTIDAD</th>
@@ -889,11 +944,11 @@ if (!isset($_SESSION["nombre"])) {
                 <?php } ?>
                 <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0;">
                   <h4 class="modal-title infotitulo" style="margin: 0; margin-bottom: 10px; padding: 0; font-weight: bold;">COMENTARIO INTERNO (*):</h4>
-                  <textarea type="text" class="form-control" id="comentario_interno" maxlength="120" rows="4" placeholder="Ingrese un comentario interno." autocomplete="off"></textarea>
+                  <textarea type="text" class="form-control" id="comentario_interno" maxlength="1000" rows="4" placeholder="Ingrese un comentario interno." autocomplete="off"></textarea>
                 </div>
                 <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0;">
                   <h4 class="modal-title infotitulo" style="margin: 0; margin-bottom: 10px; padding: 0; font-weight: bold;">COMENTARIO EXTERNO (*):</h4>
-                  <textarea type="text" class="form-control" id="comentario_externo" maxlength="120" rows="4" placeholder="Ingrese un comentario externo." autocomplete="off"></textarea>
+                  <textarea type="text" class="form-control" id="comentario_externo" maxlength="1000" rows="4" placeholder="Ingrese un comentario externo." autocomplete="off"></textarea>
                 </div>
               </div>
               <div class="col-lg-4 col-md-6 col-sm-6" style="display: flex; flex-direction: column;">
@@ -1027,11 +1082,11 @@ if (!isset($_SESSION["nombre"])) {
             <div class="col-lg-12 col-md-12 col-sm-12 table-responsive" style="padding: 15px; padding-top: 0px; background-color: white; overflow: auto;">
               <table id="detallesProductosFinal" class="table w-100" style="width: 100% !important; margin-bottom: 0px;">
                 <thead style="border-bottom: 1.5px solid black !important;">
-                  <th style="white-space: nowrap;">DESCRIPCIÓN DEL PRODUCTO</th>
-                  <th style="white-space: nowrap;">CANTIDAD</th>
-                  <th style="white-space: nowrap;">PRECIO UNITARIO</th>
-                  <th style="white-space: nowrap;">DESCUENTO</th>
-                  <th style="white-space: nowrap;">SUBTOTAL</th>
+                  <th>DESCRIPCIÓN DEL PRODUCTO</th>
+                  <th>CANTIDAD</th>
+                  <th>PRECIO UNITARIO</th>
+                  <th>DESCUENTO</th>
+                  <th>SUBTOTAL</th>
                 </thead>
                 <tfoot>
                   <tr>
@@ -1061,7 +1116,7 @@ if (!isset($_SESSION["nombre"])) {
               </table>
             </div>
 
-            <div class="col-lg-12 col-md-12 col-sm-12 table-responsive" style="padding: 15px; padding-top: 0px; background-color: white; overflow: auto;">
+            <div class="col-lg-12 col-md-12 col-sm-12 table-responsive" style="padding: 15px; padding-top: 0px; padding-bottom: 0px; background-color: white; overflow: auto;">
               <table id="detallesPagosFinal" class="table w-100" style="width: 100% !important; margin-bottom: 0px;">
                 <thead style="border-bottom: 1.5px solid black !important;">
                   <th>DESCRIPCIÓN DE PAGOS</th>
@@ -1084,6 +1139,10 @@ if (!isset($_SESSION["nombre"])) {
                 <tbody>
                 </tbody>
               </table>
+            </div>
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+              <label>Comentario interno:</label>
+              <textarea type="text" class="form-control" id="comentario_interno_detalle" maxlength="1000" rows="4" autocomplete="off" disabled></textarea>
             </div>
             <div class="col-lg-12 col-md-12 col-sm-12" style="text-align: center;">
               <h4 style="font-weight: bold;">ATENDIDO POR: <span id="atendido_venta" style="font-weight: 600;"></span></h4>
@@ -1145,6 +1204,194 @@ if (!isset($_SESSION["nombre"])) {
     </div>
     <!-- Fin modal 11 -->
 
+    <!-- Modal 12 -->
+    <div class="modal fade" id="myModal12" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog" style="width: 95% !important; max-height: 95vh; margin: 0 !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%); overflow-x: auto;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title infotitulo" style="margin: 0; padding: 0; text-align: start !important;">AGREGAR NUEVO ARTÍCULO</h4>
+          </div>
+          <div class="panel-body">
+            <form name="formulario8" id="formulario8" method="POST">
+              <div class="contenedor_articulos">
+                <div class="form-group col-lg-10 col-md-8 col-sm-12 caja2" style="background-color: white; border-top: 3px #002a8e solid !important; padding: 20px; padding-bottom: 0; padding-left: 0; padding-right: 0; margin: 0;">
+                  <div class="form-group col-lg-4 col-md-6 col-sm-12" style="margin: 0; padding: 0;">
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6">
+                      <label>Código(*):</label>
+                      <input type="text" class="form-control" id="cod_part_1" maxlength="10" placeholder="PRO" onblur="convertirMayusProduct()" required>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-6 col-sm-6">
+                      <label id="label">ㅤ</label>
+                      <input type="text" class="form-control" id="cod_part_2" maxlength="10" placeholder="0001" oninput="onlyNumbersAndMaxLenght(this)" onblur="formatearNumeroCorrelativo()" required>
+                    </div>
+                  </div>
+                  <div class="form-group col-lg-8 col-md-6 col-sm-12">
+                    <label>Nombre(*):</label>
+                    <input type="hidden" name="idarticulo" id="idarticulo">
+                    <input type="text" class="form-control" name="nombre" id="nombre3" maxlength="100" placeholder="Ingrese el nombre del producto." required>
+                  </div>
+                  <div class="form-group col-lg-4 col-md-6 col-sm-12">
+                    <label>Categoría(*):</label>
+                    <select id="idcategoria" name="idcategoria" class="form-control selectpicker" data-live-search="true" data-size="5" required></select>
+                  </div>
+                  <div class="form-group col-lg-4 col-md-6 col-sm-12">
+                    <label>Marca(*):</label>
+                    <select id="idmarca" name="idmarca" class="form-control selectpicker" data-live-search="true" data-size="5" required></select>
+                  </div>
+                  <div class="form-group col-lg-4 col-md-6 col-sm-12">
+                    <label>Local(*):</label>
+                    <select id="idlocal3" name="idlocal" class="form-control selectpicker idlocal" data-live-search="true" data-size="5" onchange="actualizarRUC5()" required>
+                      <option value="">- Seleccione -</option>
+                    </select>
+                  </div>
+                  <div class="form-group col-lg-4 col-md-6 col-sm-12">
+                    <label>RUC local(*):</label>
+                    <input type="number" class="form-control" id="local_ruc3" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="11" placeholder="RUC del local" disabled>
+                  </div>
+                  <div class="form-group col-lg-8 col-md-12 col-sm-12" style="padding: 0; margin: 0;">
+                    <div class="form-group col-lg-4 col-md-4 col-sm-12">
+                      <label>Precio compra(*):</label>
+                      <input type="number" class="form-control" name="precio_compra" id="precio_compra" step="any" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength); changeGanancia();" maxlength="8" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" placeholder="Ingrese el precio de compra." required>
+                    </div>
+                    <div class="form-group col-lg-4 col-md-4 col-sm-12">
+                      <label>Precio venta(*):</label>
+                      <input type="number" class="form-control" name="precio_venta" id="precio_venta" step="any" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength); changeGanancia();" maxlength="8" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" placeholder="Ingrese el precio de venta." required>
+                    </div>
+                    <div class="form-group col-lg-4 col-md-4 col-sm-12">
+                      <label>Ganancia(*):</label>
+                      <input type="number" class="form-control" name="ganancia" id="ganancia" step="any" value="0.00" disabled>
+                    </div>
+                  </div>
+                  <div class="form-group col-lg-4 col-md-6 col-sm-12">
+                    <label>Stock(*):</label>
+                    <input type="number" class="form-control" name="stock" id="stock" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" placeholder="Ingrese el stock." required>
+                  </div>
+                  <div class="form-group col-lg-4 col-md-6 col-sm-12">
+                    <label>Stock mínimo(*):</label>
+                    <input type="number" class="form-control" name="stock_minimo" id="stock_minimo" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" placeholder="Ingrese el stock mínimo." required>
+                  </div>
+                  <div class="form-group col-lg-4 col-md-6 col-sm-12">
+                    <label>Imagen:</label>
+                    <input type="file" class="form-control" name="imagen" id="imagen2" accept="image/x-png,image/gif,image/jpeg">
+                    <input type="hidden" name="imagenactual" id="imagenactual">
+                  </div>
+                  <div class="form-group col-lg-6 col-md-6 col-sm-12">
+                    <label>Descripción:</label>
+                    <input type="text" class="form-control" name="descripcion" id="descripcion5" maxlength="1000" placeholder="Ingrese la descripción del producto." autocomplete="off">
+                    <div style="display: flex; justify-content: end;">
+                      <div id="camera"></div>
+                    </div>
+                  </div>
+                  <div class="form-group col-lg-6 col-md-12 col-sm-12">
+                    <div>
+                      <label>Código de barra(*):</label>
+                      <input type="text" class="form-control" name="codigo" id="codigo_barra" maxlength="18" placeholder="Ingrese el código de barra.">
+                    </div>
+                    <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+                      <button class="btn btn-info" type="button" onclick="generar()">Generar</button>
+                      <button class="btn btn-warning" type="button" onclick="imprimir()">Imprimir</button>
+                      <button class="btn btn-danger" type="button" onclick="borrar()">Borrar</button>
+                      <button class="btn btn-success btn1" type="button" onclick="escanear()">Escanear</button>
+                      <button class="btn btn-danger btn2" type="button" onclick="detenerEscaneo()">Detener</button>
+                    </div>
+                    <div id="print" style="overflow-y: hidden;">
+                      <img id="barcode">
+                    </div>
+                  </div>
+                  <div class="form-group col-lg-12 col-md-12" style="display: flex; justify-content: center;">
+                    <button class="btn btn-success" type="button" id="btnDetalles1" onclick="frmDetalles(true)"><i class="fa fa-plus"></i> Más detalles</button>
+                    <button class="btn btn-danger" type="button" id="btnDetalles2" onclick="frmDetalles(false)"><i class="fa fa-minus"></i> Cerrar</button>
+                  </div>
+                  <!-- form detalles -->
+                  <div id="frmDetalles" class="col-lg-12 col-md-12" style="margin: 0 !important; padding: 0 !important;">
+                    <div class="form-group col-lg-6 col-md-12">
+                      <label>Comisión:</label>
+                      <input type="number" class="form-control" name="comision" id="comision" step="any" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="8" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="0" placeholder="Ingrese la comisión del producto.">
+                    </div>
+                    <div class="form-group col-lg-6 col-md-12">
+                      <label>Talla:</label>
+                      <input type="text" class="form-control" name="talla" id="talla" maxlength="15" placeholder="Ingrese la talla del producto." autocomplete="off">
+                    </div>
+                    <div class="form-group col-lg-6 col-md-12">
+                      <label>Color:</label>
+                      <input type="text" class="form-control" name="color" id="color" maxlength="30" placeholder="Ingrese el color del producto." autocomplete="off">
+                    </div>
+                    <div class="form-group col-lg-6 col-md-12">
+                      <label>Unidad de medida:</label>
+                      <select id="idmedida" name="idmedida" class="form-control selectpicker" data-live-search="true"></select>
+                    </div>
+                    <div class="form-group col-lg-6 col-md-12">
+                      <label>Peso:</label>
+                      <input type="number" class="form-control" name="peso" id="peso" step="any" onkeydown="evitarNegativo(event)" oninput="if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" min="0" placeholder="Ingrese el peso.">
+                    </div>
+                  </div>
+                  <!-- end form detalles -->
+                </div>
+                <div class="form-group col-lg-2 col-md-4 col-sm-12 caja1" style="padding-right: 0 !important; padding-left: 20px;">
+                  <div class="contenedor" style="background-color: white; border-top: 3px #002a8e solid !important; padding: 10px 20px 20px 20px; text-align: center;">
+                    <label>Imagen de muestra:</label>
+                    <div>
+                      <img src="" width="100%" id="imagenmuestra" style="display: none;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group col-lg-10 col-md-8 col-sm-12 botones" style="background-color: white !important; padding: 10px !important; float: left; margin: 0;">
+                <div style="float: left;">
+                  <button class="btn btn-warning" onclick="cancelarform2()" type="button"><i class="fa fa-arrow-circle-left"></i> Cancelar</button>
+                  <button class="btn btn-bcp" type="submit" id="btnGuardarProducto"><i class="fa fa-save"></i> Guardar</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Fin modal 12 -->
+
+    <!-- Form categoría -->
+    <form name="formularioCategoria" id="formularioCategoria" method="POST" style="display: none;">
+      <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+        <label>Nombre(*):</label>
+        <input type="hidden" name="idcategoria" id="idcategoria2">
+        <input type="text" class="form-control" name="titulo" id="titulo2" maxlength="50" placeholder="Nombre" required>
+      </div>
+      <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+        <label>Descripción:</label>
+        <input type="text" class="form-control" name="descripcion" id="descripcion6" maxlength="256" placeholder="Descripción">
+      </div>
+    </form>
+    <!-- Fin form categoría -->
+
+    <!-- Form marcas -->
+    <form name="formularioMarcas" id="formularioMarcas" method="POST" style="display: none;">
+      <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <label>Marca(*):</label>
+        <input type="hidden" name="idmarca" id="idmarca3">
+        <input type="text" class="form-control" name="titulo" id="titulo3" maxlength="50" placeholder="Nombre de la marca" required>
+      </div>
+      <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <label>Descripción:</label>
+        <textarea type="text" class="form-control" name="descripcion" id="descripcion7" maxlength="1000" rows="4" placeholder="Descripción"></textarea>
+      </div>
+    </form>
+    <!-- Fin form marcas -->
+
+    <!-- Form medidas -->
+    <form name="formularioMedidas" id="formularioMedidas" method="POST" style="display: none;">
+      <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <label>Medida(*):</label>
+        <input type="hidden" name="idmedida" id="idmedida4">
+        <input type="text" class="form-control" name="titulo" id="titulo4" maxlength="50" placeholder="Nombre de la medida" required>
+      </div>
+      <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <label>Descripción:</label>
+        <textarea type="text" class="form-control" name="descripcion" id="descripcion8" maxlength="1000" rows="4" placeholder="Descripción"></textarea>
+      </div>
+    </form>
+    <!-- Fin form medidas -->
+
   <?php
   } else {
     require 'noacceso.php';
@@ -1152,6 +1399,8 @@ if (!isset($_SESSION["nombre"])) {
 
   require 'footer.php';
   ?>
+  <script type="text/javascript" src="../public/js/JsBarcode.all.min.js"></script>
+  <script type="text/javascript" src="../public/js/jquery.PrintArea.js"></script>
   <script type="text/javascript" src="scripts/venta.js"></script>
   <script src="scripts/jquery.gScrollingCarousel.js"></script>
   <script>

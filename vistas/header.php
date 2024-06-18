@@ -176,6 +176,13 @@ $local_login = $_SESSION['local'];
     margin: 0;
     line-height: 1;
   }
+
+
+  @media (max-width: 991.50px) {
+    .smallModal {
+      width: 90% !important;
+    }
+  }
 </style>
 
 <!DOCTYPE html>
@@ -189,7 +196,7 @@ $local_login = $_SESSION['local'];
   <meta http-equiv="Last-Modified" content="0">
   <meta http-equiv="Cache-Control" content="no-cache, mustrevalidate">
   <meta http-equiv="Pragma" content="no-cache">
-  <title>Sistema de Peluquería | www.SistemaDePeluqueria.com</title>
+  <title>Sistema de ventas | www.SistemaDeVentas.com</title>
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.5 -->
   <link rel="stylesheet" href="../public/css/bootstrap.min.css">
@@ -218,8 +225,8 @@ $local_login = $_SESSION['local'];
 
     <header class="main-header" style="box-shadow: 0px 0px 15px -7px; position: sticky !important; width: 100%">
       <a href="escritorio.php" class="logo" style="color: white !important; background-color: #002a8e !important;">
-        <span class="logo-mini"><b>S.I.</b></span>
-        <span class="logo-lg" style="font-size: 15px;"><b>Sistema de Peluquería</b></span>
+        <span class="logo-mini"><b>S.V.</b></span>
+        <span class="logo-lg" style="font-size: 15px;"><b>Sistema de ventas</b></span>
       </a>
       <nav class="navbar" role="navigation" style="background-color: #002a8e !important;">
         <div style="display: flex; align-items: center; float: left;">
@@ -239,7 +246,7 @@ $local_login = $_SESSION['local'];
                 <li class="user-header" style="background: #002a8e !important;">
                   <img src="../files/usuarios/<?php echo $_SESSION['imagen']; ?>" class="img-circle" alt="User Image">
                   <p style="color: white !important;">
-                    Sistema de Peluquería
+                    Sistema de ventas
                     <small>nuestro contacto: +51 937 075 845</small>
                   </p>
                 </li>
@@ -290,7 +297,7 @@ $local_login = $_SESSION['local'];
               <ul class="treeview-menu">
                 <li id="lArticulos"><a href="articulo.php"><i class="fa fa-circle-o"></i> Productos</a></li>
                 ';
-            if ($_SESSION['cargo'] == "superadmin" || $_SESSION['cargo'] == "admin_total") {
+            if (($_SESSION['cargo'] == "superadmin" || $_SESSION['cargo'] == "admin_total") && $_SESSION['PExternos'] == 1) {
               echo '<li id="lArticulosExternos"><a href="articuloExterno.php"><i class="fa fa-circle-o"></i> Productos Externos</a></li>';
             }
             echo '
@@ -444,7 +451,8 @@ $local_login = $_SESSION['local'];
                 <i class="fa fa-angle-left pull-right"></i>
               </a>
               <ul class="treeview-menu">
-              <li id="lReporteProductos"><a href="reporteProductoMasVendido.php"><i class="fa fa-circle-o"></i> Productos más vendidos</a></li>
+              <li id="lReporteProductosV"><a href="reporteProductoMasVendido.php"><i class="fa fa-circle-o"></i> Productos más vendidos</a></li>
+              <li id="lReporteProductosC"><a href="reporteProductoMasComprado.php"><i class="fa fa-circle-o"></i> Productos más comprados</a></li>
               </ul>
             </li>';
           }

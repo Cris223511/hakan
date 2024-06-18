@@ -158,11 +158,11 @@ if (!isset($_SESSION["nombre"])) {
 					$data[] = array(
 						"0" => '<div style="display: flex; flex-wrap: nowrap; gap: 3px">' .
 							'<a data-toggle="modal" href="#myModal9"><button class="btn btn-success" style="margin-right: 3px; width: 35px; height: 35px; color: white !important;" onclick="modalImpresion(' . $reg->idproforma . ', \'' . $reg->num_comprobante . '\')"><i class="fa fa-print"></i></button></a>' .
-							'<a data-toggle="modal" href="#myModal10"><button class="btn btn-info" style="margin-right: 3px; width: 35px; height: 35px; color: white !important;" onclick="modalDetalles(' . $reg->idproforma . ', \'' . $reg->usuario . '\', \'' . $reg->num_comprobante . '\', \'' . $reg->cliente . '\', \'' . $reg->cliente_tipo_documento . '\', \'' . $reg->cliente_num_documento . '\', \'' . $reg->cliente_direccion . '\', \'' . $reg->impuesto . '\', \'' . $reg->total_venta . '\', \'' . $reg->vuelto . '\')"><i class="fa fa-info-circle"></i></button></a>' .
+							'<a data-toggle="modal" href="#myModal10"><button class="btn btn-info" style="margin-right: 3px; width: 35px; height: 35px; color: white !important;" onclick="modalDetalles(' . $reg->idproforma . ', \'' . $reg->usuario . '\', \'' . $reg->num_comprobante . '\', \'' . $reg->cliente . '\', \'' . $reg->cliente_tipo_documento . '\', \'' . $reg->cliente_num_documento . '\', \'' . $reg->cliente_direccion . '\', \'' . $reg->impuesto . '\', \'' . $reg->total_venta . '\', \'' . $reg->vuelto . '\', \'' . $reg->comentario_interno . '\')"><i class="fa fa-info-circle"></i></button></a>' .
 							(($reg->estado == 'Iniciado' || $reg->estado == 'Entregado' || $reg->estado == 'Por entregar' || $reg->estado == 'En transcurso' || $reg->estado == 'Finalizado') ?
-								(mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<a data-toggle="modal" href="#myModal11"><button class="btn btn-bcp" style="margin-right: 3px; height: 35px;" onclick="modalEstadoVenta(' . $reg->idproforma . ', \'' . $reg->num_comprobante . '\')"><i class="fa fa-gear"></i></button></a>') .
-									(mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-warning" style="margin-right: 3px; height: 35px;" onclick="enviar(' . $reg->idproforma . ', ' . $reg->idlocal . ')"><i class="fa fa-sign-in"></i></button>') .
-										(mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-danger" style="margin-right: 3px; height: 35px;" onclick="anular(' . $reg->idproforma . ')"><i class="fa fa-close"></i></button>')))) : ('')) .
+								((($_SESSION["cargo"] == 'superadmin' || $_SESSION["cargo"] == 'admin_total') ? (mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<a data-toggle="modal" href="#myModal11"><button class="btn btn-bcp" style="margin-right: 3px; height: 35px;" onclick="modalEstadoVenta(' . $reg->idproforma . ', \'' . $reg->num_comprobante . '\')"><i class="fa fa-gear"></i></button></a>')) : ("")) .
+									(mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-warning" style="margin-right: 3px; height: 35px;" onclick="enviar(' . $reg->idproforma . ', ' . $reg->idlocal . ')"><i class="fa fa-sign-in"></i></button>')) .
+									(mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-danger" style="margin-right: 3px; height: 35px;" onclick="anular(' . $reg->idproforma . ')"><i class="fa fa-close"></i></button>'))) : ('')) .
 							mostrarBoton2($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-danger" style="margin-right: 3px; height: 35px;" onclick="eliminar(' . $reg->idproforma . ')"><i class="fa fa-trash"></i></button>') .
 							'</div>',
 						"1" => '<a target="_blank" href="../reportes/exA4Proforma.php?id=' . $reg->idproforma . '"> <button class="btn btn-info" style="margin-right: 3px; height: 35px; color: white !important;"><i class="fa fa-save"></i></button></a>',
@@ -210,50 +210,63 @@ if (!isset($_SESSION["nombre"])) {
 				/* ======================= SUNAT ======================= */
 
 			case 'consultaSunat':
+				// Token para la API
+				$token = 'apis-token-8814.1Tq4Gy-yKM7ZSWPx6eQC0feuDpVKbuEZ';
+
 				$data = "";
 				$curl = curl_init();
 
 				try {
 					if (strlen($sunat) == 8) {
 						// DNI
-						curl_setopt($curl, CURLOPT_URL, 'https://api.apis.net.pe/v1/dni?numero=' . $sunat);
+						$url = 'https://api.apis.net.pe/v2/reniec/dni?numero=' . $sunat;
+						$referer = 'https://apis.net.pe/consulta-dni-api';
 					} elseif (strlen($sunat) == 11) {
 						// RUC
-						curl_setopt($curl, CURLOPT_URL, 'https://api.apis.net.pe/v1/ruc?numero=' . $sunat);
+						$url = 'https://api.apis.net.pe/v2/sunat/ruc?numero=' . $sunat;
+						$referer = 'http://apis.net.pe/api-ruc';
 					} elseif (strlen($sunat) < 8) {
 						// Mensaje para DNI no válido
 						$data = "El DNI debe tener 8 caracteres.";
+						echo $data;
+						break;
 					} elseif (strlen($sunat) > 8 && strlen($sunat) < 11) {
 						// Mensaje para RUC no válido
 						$data = "El RUC debe tener 11 caracteres.";
-					}
-
-					if (!empty($data)) {
 						echo $data;
 						break;
 					}
 
-					// Configurar opciones de cURL
-					curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+					// configuración de cURL
+					curl_setopt_array($curl, array(
+						CURLOPT_URL => $url,
+						CURLOPT_RETURNTRANSFER => true,
+						CURLOPT_SSL_VERIFYPEER => 0,
+						CURLOPT_ENCODING => '',
+						CURLOPT_MAXREDIRS => 2,
+						CURLOPT_TIMEOUT => 0,
+						CURLOPT_FOLLOWLOCATION => true,
+						CURLOPT_CUSTOMREQUEST => 'GET',
+						CURLOPT_HTTPHEADER => array(
+							'Referer: ' . $referer,
+							'Authorization: Bearer ' . $token
+						),
+					));
 
-					// Ejecutar la solicitud
 					$response = curl_exec($curl);
 
 					if ($response === false) {
 						throw new Exception(curl_error($curl));
 					}
 
-					// Verificar si la respuesta contiene "Not Found" y ajustar el mensaje en consecuencia
-					if (stripos($response, 'Not Found') !== false || stripos($response, '{"error":"RUC invalido"}') !== false) {
-						$data = (strlen($sunat) == 8) ? "DNI no encontrado" : "RUC no encontrado";
+					if (stripos($response, 'Not Found') !== false || stripos($response, '{"message":"ruc no valido"}') !== false) {
+						$data = (strlen($sunat) == 8) ? "DNI no valido" : "RUC no valido";
 					} else {
 						$data = $response;
 					}
 				} catch (Exception $e) {
-					// Capturar excepción y proporcionar mensaje controlado
 					$data = "Error al procesar la solicitud: " . $e->getMessage();
 				} finally {
-					// Cerrar cURL
 					curl_close($curl);
 				}
 

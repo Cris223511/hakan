@@ -1,24 +1,21 @@
 objSelects = {};
+let select = $("#idlocal"); // select
 
 //Función que se ejecuta al inicio
 function init() {
 	$("#formulario").on("submit", function (e) {
 		guardaryeditar(e);
 	});
+
 	$('#mPerfilUsuario').addClass("treeview active");
 	$('#lConfUsuario').addClass("active");
 
 	// Cargamos los items al select "local principal"
-	$.post("../ajax/locales.php?op=selectLocalASC", function (data) {
+	$.post("../ajax/locales.php?op=selectLocales", function (data) {
 		// console.log(data);
 		objSelects = JSON.parse(data);
-		console.log(objSelects)
+		console.log(objSelects);
 		if (objSelects.length != 0) {
-			const select = $("#idlocal");
-
-			select.empty();
-			select.html('<option value="">- Seleccione -</option>');
-
 			objSelects.locales.forEach(function (opcion) {
 				select.append('<option value="' + opcion.idlocal + '" data-local-ruc="' + opcion.local_ruc + '">' + opcion.titulo + '</option>');
 			});
@@ -74,7 +71,6 @@ function actualizarInfoUsuario() {
 		url: "../ajax/confUsuario.php?op=actualizarSession",
 		dataType: 'json',
 		success: function (data) {
-			data = limpiarCadena(data);
 			console.log(data)
 			// actualizar la imagen y el nombre del usuario en la cabecera
 			$('.user-image, .img-circle').attr('src', '../files/usuarios/' + data.imagen);

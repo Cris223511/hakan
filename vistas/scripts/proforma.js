@@ -4,24 +4,7 @@ let idCajaFinal = 0;
 
 inicializeGLightbox();
 
-//Función que se ejecuta al inicio
-function init() {
-	mostrarform(false);
-	listar();
-	listarDatos();
-
-	$("#formulario").on("submit", function (e) { guardaryeditar(e); });
-	$("#formulario2").on("submit", function (e) { guardaryeditar2(e); });
-	$("#formulario3").on("submit", function (e) { guardaryeditar3(e); });
-	$("#formulario4").on("submit", function (e) { guardaryeditar4(e); });
-	$("#formSunat").on("submit", function (e) { buscarSunat(e); });
-	$("#formulario5").on("submit", function (e) { guardaryeditar5(e); });
-	$("#formulario6").on("submit", function (e) { guardaryeditar6(e); });
-	$("#formulario7").on("submit", function (e) { guardaryeditar7(e); });
-
-	$('#mVentas').addClass("treeview active");
-	$('#lProformas').addClass("active");
-}
+//correlativos
 
 function actualizarCorrelativo() {
 	$.post("../ajax/proforma.php?op=getLastNumComprobante", function (e) {
@@ -45,16 +28,255 @@ function actualizarCorrelativoLocal(idlocal) {
 			$("#idlocal_session").val("");
 			$("#idlocal_session").selectpicker('refresh');
 			$("#num_comprobante_final1").text(lastNumComp);
-		} else if (obj.estado != "aperturado") {
-			bootbox.alert("La caja del local seleccionado no se encuentra aperturada.");
-			$("#idlocal_session").val("");
-			$("#idlocal_session").selectpicker('refresh');
-			$("#num_comprobante_final1").text(lastNumComp);
 		} else {
 			lastNumComp = generarSiguienteCorrelativo(obj.last_num_comprobante);
 			idCajaFinal = obj.idcaja;
 		}
 	});
+}
+
+function actualizarCorrelativoProducto(idlocal) {
+	$.post("../ajax/articulo.php?op=getLastCodigo", { idlocal: idlocal }, function (num) {
+		console.log(num);
+		const partes = num.match(/([a-zA-Z]+)(\d+)/) || ["", "", ""];
+
+		const letras = partes[1];
+		const numeros = partes[2];
+
+		const siguienteCorrelativo = generarSiguienteCorrelativo(numeros);
+
+		$("#cod_part_1").val(letras);
+		$("#cod_part_2").val(siguienteCorrelativo);
+	});
+}
+
+//Función que se ejecuta al inicio
+function init() {
+	mostrarform(false);
+	listar();
+	listarDatos();
+
+	$("#formulario").on("submit", function (e) { guardaryeditar(e); });
+	$("#formulario2").on("submit", function (e) { guardaryeditar2(e); });
+	$("#formulario3").on("submit", function (e) { guardaryeditar3(e); });
+	$("#formulario4").on("submit", function (e) { guardaryeditar4(e); });
+	$("#formSunat").on("submit", function (e) { buscarSunat(e); });
+	$("#formulario5").on("submit", function (e) { guardaryeditar5(e); });
+	$("#formulario6").on("submit", function (e) { guardaryeditar6(e); });
+	$("#formulario7").on("submit", function (e) { guardaryeditar7(e); });
+	$("#formulario8").on("submit", function (e) { guardaryeditar8(e); });
+
+	$('#mVentas').addClass("treeview active");
+	$('#lProformas').addClass("active");
+
+	// productos
+
+	$("#btnDetalles1").show();
+	$("#btnDetalles2").hide();
+	$("#frmDetalles").hide();
+
+	$(".btn1").show();
+	$(".btn2").hide();
+
+	$("#imagenmuestra").hide();
+
+	$.post("../ajax/articulo.php?op=listarTodosActivos", function (data) {
+		const obj = JSON.parse(data);
+		console.log(obj);
+
+		const selects = {
+			"idmarca": $("#idmarca, #idmarcaBuscar"),
+			"idcategoria": $("#idcategoria, #idcategoriaBuscar"),
+			"idlocal": $("#idlocal5"),
+			"idmedida": $("#idmedida"),
+		};
+
+		for (const selectId in selects) {
+			if (selects.hasOwnProperty(selectId)) {
+				const select = selects[selectId];
+				const atributo = selectId.replace('id', '');
+
+				if (obj.hasOwnProperty(atributo)) {
+					select.empty();
+					select.html('<option value="">- Seleccione -</option>');
+					obj[atributo].forEach(function (opcion) {
+						if (atributo != "local") {
+							select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
+						} else {
+							select.append('<option value="' + opcion.id + '" data-local-ruc="' + opcion.ruc + '">' + opcion.titulo + '</option>');
+						}
+					});
+					select.selectpicker('refresh');
+				}
+			}
+		}
+
+		$("#idlocal").val($("#idlocal option:first").val());
+		$("#idlocal").selectpicker('refresh');
+
+		$('#idcategoria').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregarCategoria(event)');
+		$('#idcategoria').closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
+
+		$('#idmarca').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregarMarca(event)');
+		$('#idmarca').closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
+
+		$('#idmedida').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregarMedida(event)');
+		$('#idmedida').closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
+
+		actualizarRUC5();
+	});
+
+}
+
+function listarTodosActivos(selectId) {
+	$.post("../ajax/articulo.php?op=listarTodosActivos", function (data) {
+		const obj = JSON.parse(data);
+
+		const select = $("#" + selectId);
+		const atributo = selectId.replace('id', '');
+
+		if (obj.hasOwnProperty(atributo)) {
+			select.empty();
+			select.html('<option value="">- Seleccione -</option>');
+			obj[atributo].forEach(function (opcion) {
+				if (atributo !== "almacen") {
+					select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
+				}
+			});
+			select.selectpicker('refresh');
+		}
+
+		select.closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregar' + atributo.charAt(0).toUpperCase() + atributo.slice(1) + '(event)');
+		select.closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
+		$("#" + selectId + ' option:last').prop("selected", true);
+		select.selectpicker('refresh');
+		select.selectpicker('toggle');
+	});
+}
+
+function agregarCategoria(e) {
+	let inputValue = $('#idcategoria').closest('.form-group').find('input[type="text"]');
+
+	if (e.key === "Enter") {
+		if ($('.no-results').is(':visible')) {
+			e.preventDefault();
+			$("#titulo2").val(inputValue.val());
+
+			var formData = new FormData($("#formularioCategoria")[0]);
+
+			$.ajax({
+				url: "../ajax/categoria.php?op=guardaryeditar",
+				type: "POST",
+				data: formData,
+				contentType: false,
+				processData: false,
+
+				success: function (datos) {
+					datos = limpiarCadena(datos);
+					if (!datos) {
+						console.log("No se recibieron datos del servidor.");
+						return;
+					} else if (datos == "El nombre de la categoría que ha ingresado ya existe.") {
+						bootbox.alert(datos);
+						return;
+					} else {
+						// bootbox.alert(datos);
+						listarTodosActivos("idcategoria");
+						$("#idcategoria2").val("");
+						$("#titulo2").val("");
+						$("#descripcion6").val("");
+					}
+				}
+			});
+		}
+	}
+}
+
+function agregarMarca(e) {
+	let inputValue = $('#idmarca').closest('.form-group').find('input[type="text"]');
+
+	if (e.key === "Enter") {
+		if ($('.no-results').is(':visible')) {
+			e.preventDefault();
+			$("#titulo3").val(inputValue.val());
+
+			var formData = new FormData($("#formularioMarcas")[0]);
+
+			$.ajax({
+				url: "../ajax/marcas.php?op=guardaryeditar",
+				type: "POST",
+				data: formData,
+				contentType: false,
+				processData: false,
+
+				success: function (datos) {
+					datos = limpiarCadena(datos);
+					if (!datos) {
+						console.log("No se recibieron datos del servidor.");
+						return;
+					} else if (datos == "El nombre de la marca que ha ingresado ya existe.") {
+						bootbox.alert(datos);
+						return;
+					} else {
+						// bootbox.alert(datos);
+						listarTodosActivos("idmarca");
+						$("#idmarca3").val("");
+						$("#titulo3").val("");
+						$("#descripcion7").val("");
+					}
+				}
+			});
+		}
+	}
+}
+
+function agregarMedida(e) {
+	let inputValue = $('#idmedida').closest('.form-group').find('input[type="text"]');
+
+	if (e.key === "Enter") {
+		if ($('.no-results').is(':visible')) {
+			e.preventDefault();
+			$("#titulo4").val(inputValue.val());
+
+			var formData = new FormData($("#formularioMedidas")[0]);
+
+			$.ajax({
+				url: "../ajax/medidas.php?op=guardaryeditar",
+				type: "POST",
+				data: formData,
+				contentType: false,
+				processData: false,
+
+				success: function (datos) {
+					datos = limpiarCadena(datos);
+					if (!datos) {
+						console.log("No se recibieron datos del servidor.");
+						return;
+					} else if (datos == "El nombre de la medida que ha ingresado ya existe.") {
+						bootbox.alert(datos);
+						return;
+					} else {
+						// bootbox.alert(datos);
+						listarTodosActivos("idmedida");
+						$("#idmedida4").val("");
+						$("#titulo4").val("");
+						$("#descripcion8").val("");
+					}
+				}
+			});
+		}
+	}
+}
+
+function changeGanancia() {
+	let precio_venta = $("#precio_venta").val();
+	let precio_compra = $("#precio_compra").val();
+
+	// Verificar si ambos campos están llenos
+	if (precio_venta !== '' && precio_compra !== '') {
+		let ganancia = precio_venta - precio_compra;
+		$("#ganancia").val(ganancia.toFixed(2));
+	}
 }
 
 function actualizarRUC() {
@@ -96,6 +318,66 @@ function actualizarRUC4() {
 	}
 }
 
+function actualizarRUC5() {
+	const selectLocal = document.getElementById("idlocal5");
+	const localRUCInput = document.getElementById("local_ruc5");
+	const selectedOption = selectLocal.options[selectLocal.selectedIndex];
+
+	if (selectedOption.value !== "") {
+		const localRUC = selectedOption.getAttribute('data-local-ruc');
+		localRUCInput.value = localRUC;
+	} else {
+		localRUCInput.value = "";
+	}
+
+	idlocal = $("#idlocal5").val();
+	actualizarCorrelativoProducto(idlocal);
+}
+
+//Función limpiar modal de artículos
+function limpiarModalArticulos() {
+	$("#codigo_barra").val("");
+	$("#cod_part_1").val("");
+	$("#cod_part_2").val("");
+	$("#nombre3").val("");
+	$("#local_ruc3").val("");
+	$("#descripcion5").val("");
+	$("#talla").val("");
+	$("#color").val("");
+	$("#peso").val("");
+	$("#stock").val("");
+	$("#stock_minimo").val("");
+	$("#imagenmuestra").attr("src", "");
+	$("#imagenmuestra").hide();
+	$("#imagenactual").val("");
+	$("#imagen2").val("");
+	$("#precio_compra").val("");
+	$("#precio_venta").val("");
+	$("#ganancia").val("0.00");
+	$("#comision").val("");
+	$("#print").hide();
+	$("#idarticulo").val("");
+
+	$("#idcategoria").val($("#idcategoria option:first").val());
+	$("#idcategoria").selectpicker('refresh');
+	$("#idlocal5").val($("#idlocal5 option:first").val());
+	$("#idlocal5").selectpicker('refresh');
+	$("#idmarca").val($("#idmarca option:first").val());
+	$("#idmarca").selectpicker('refresh');
+	$("#idmedida").val($("#idmedida option:first").val());
+	$("#idmedida").selectpicker('refresh');
+
+	idlocal = 0;
+
+	actualizarRUC5();
+
+	$(".btn1").show();
+	$(".btn2").hide();
+
+	detenerEscaneo();
+
+}
+
 function limpiar() {
 	limpiarModalEmpleados();
 	limpiarModalMetodoPago();
@@ -103,6 +385,7 @@ function limpiar() {
 	limpiarModalClientes2();
 	limpiarModalClientes4();
 	limpiarModalPrecuenta();
+	limpiarModalArticulos();
 
 	listarDatos();
 
@@ -133,16 +416,267 @@ function limpiarTodo() {
 	})
 }
 
+function frmDetalles(bool) {
+	if (bool == true) { $("#frmDetalles").show(); $("#btnDetalles1").hide(); $("#btnDetalles2").show(); }
+	if (bool == false) { $("#frmDetalles").hide(); $("#btnDetalles1").show(); $("#btnDetalles2").hide(); }
+	// $('html, body').animate({ scrollTop: $(document).height() }, 10);
+}
+
+//Función para guardar o editar
+
+function guardaryeditar8(e) {
+	e.preventDefault(); //No se activará la acción predeterminada del evento
+
+	var codigoBarra = $("#codigo_barra").val();
+
+	var formatoValido = /^[0-9]{1} [0-9]{2} [0-9]{4} [0-9]{1} [0-9]{4} [0-9]{1}$/.test(codigoBarra);
+
+	if (!formatoValido && codigoBarra != "") {
+		bootbox.alert("El formato del código de barra no es válido. El formato correcto es: X XX XXXX X XXXX X");
+		$("#btnGuardarProducto").prop("disabled", false);
+		return;
+	}
+
+	// var stock = parseFloat($("#stock").val());
+	// var stock_minimo = parseFloat($("#stock_minimo").val());
+
+	// if (stock_minimo > stock) {
+	// 	bootbox.alert("El stock mínimo no puede ser mayor que el stock normal.");
+	// 	return;
+	// }
+
+	var precio_compra = parseFloat($("#precio_compra").val());
+	var precio_venta = parseFloat($("#precio_venta").val());
+
+	if (precio_compra > precio_venta) {
+		bootbox.alert("El precio de compra no puede ser mayor que el precio de venta.");
+		return;
+	}
+
+	$("#btnGuardarProducto").prop("disabled", true);
+	$("#ganancia").prop("disabled", false);
+
+	formatearNumeroCorrelativo();
+
+	var parteLetras = $("#cod_part_1").val();
+	var parteNumeros = $("#cod_part_2").val();
+	var codigoCompleto = parteLetras + parteNumeros;
+
+	var formData = new FormData($("#formulario8")[0]);
+	formData.append("codigo_producto", codigoCompleto);
+
+	$("#ganancia").prop("disabled", true);
+
+	let detalles = frmDetallesVisible() ? obtenerDetalles() : { talla: '', color: '', idmedida: '0', peso: '0.00' };
+
+	for (let key in detalles) {
+		formData.append(key, detalles[key]);
+	}
+
+	$.ajax({
+		url: "../ajax/articulo.php?op=guardaryeditar",
+		type: "POST",
+		data: formData,
+		contentType: false,
+		processData: false,
+
+		success: function (datos) {
+			datos = limpiarCadena(datos);
+			if (datos == "El código de barra del producto que ha ingresado ya existe." || datos == "El código del producto que ha ingresado ya existe en el local seleccionado.") {
+				bootbox.alert(datos);
+				$("#btnGuardarProducto").prop("disabled", false);
+				return;
+			}
+			limpiarModalArticulos();
+			$("#myModal12").modal("hide");
+			$("#btnGuardar").prop("disabled", false);
+			bootbox.alert(datos);
+
+			$.post("../ajax/venta.php?op=listarTodosLocalActivosPorUsuario", function (data) {
+				const obj = JSON.parse(data);
+
+				let articulo = obj.articulo;
+				let servicio = obj.servicio;
+
+				listarSelectsArticulos(articulo, servicio);
+				listarArticulos(articulo, servicio);
+			});
+		}
+	});
+}
+
+function obtenerDetalles() {
+	let detalles = {
+		talla: $("#talla").val(),
+		color: $("#color").val(),
+		idmedida: $("#idmedida").val(),
+		peso: $("#peso").val()
+	};
+
+	if (!detalles.talla) detalles.talla = '';
+	if (!detalles.color) detalles.color = '';
+	if (!detalles.idmedida) detalles.idmedida = '0';
+	if (!detalles.peso) detalles.peso = '0.00';
+
+	return detalles;
+}
+
+function frmDetallesVisible() {
+	return $("#frmDetalles").is(":visible");
+}
+
+var quaggaIniciado = false;
+
+function escanear() {
+
+	// Intentar acceder a la cámara
+	navigator.mediaDevices.getUserMedia({ video: true })
+		.then(function (stream) {
+			$(".btn1").hide();
+			$(".btn2").show();
+
+			// Acceso a la cámara exitoso, inicializa Quagga
+			Quagga.init({
+				inputStream: {
+					name: "Live",
+					type: "LiveStream",
+					target: document.querySelector('#camera')
+				},
+				decoder: {
+					readers: ["code_128_reader"]
+				}
+			}, function (err) {
+				if (err) {
+					console.log(err);
+					return;
+				}
+				console.log("Initialization finished. Ready to start");
+				Quagga.start();
+				quaggaIniciado = true;
+			});
+
+			$("#camera").show();
+
+			Quagga.onDetected(function (data) {
+				console.log(data.codeResult.code);
+				var codigoBarra = data.codeResult.code;
+				document.getElementById('codigo').value = codigoBarra;
+			});
+		})
+		.catch(function (error) {
+			bootbox.alert("No se encontró una cámara conectada.");
+		});
+}
+
+function detenerEscaneo() {
+	if (quaggaIniciado) {
+		Quagga.stop();
+		$(".btn1").show();
+		$(".btn2").hide();
+		$("#camera").hide();
+		formatearNumero();
+		quaggaIniciado = false;
+	}
+}
+
+$("#codigo_barra").on("input", function () {
+	formatearNumero();
+});
+
+function formatearNumero() {
+	var codigo = $("#codigo_barra").val().replace(/\s/g, '').replace(/\D/g, '');
+	var formattedCode = '';
+
+	for (var i = 0; i < codigo.length; i++) {
+		if (i === 1 || i === 3 || i === 7 || i === 8 || i === 12 || i === 13) {
+			formattedCode += ' ';
+		}
+
+		formattedCode += codigo[i];
+	}
+
+	var maxLength = parseInt($("#codigo_barra").attr("maxlength"));
+	if (formattedCode.length > maxLength) {
+		formattedCode = formattedCode.substring(0, maxLength);
+	}
+
+	$("#codigo_barra").val(formattedCode);
+	generarbarcode(0);
+}
+
+function borrar() {
+	$("#codigo_barra").val("");
+	$("#codigo_barra").focus();
+	$("#print").hide();
+}
+
+//función para generar el número aleatorio del código de barra
+function generar() {
+	var codigo = "7 75 ";
+	codigo += generarNumero(10000, 999) + " ";
+	codigo += Math.floor(Math.random() * 10) + " ";
+	codigo += generarNumero(100, 9) + " ";
+	codigo += Math.floor(Math.random() * 10);
+	$("#codigo_barra").val(codigo);
+	generarbarcode(1);
+}
+
+function generarNumero(max, min) {
+	var numero = Math.floor(Math.random() * (max - min + 1)) + min;
+	var numeroFormateado = ("0000" + numero).slice(-4);
+	return numeroFormateado;
+}
+
+// Función para generar el código de barras
+function generarbarcode(param) {
+
+	if (param == 1) {
+		var codigo = $("#codigo_barra").val().replace(/\s/g, '');
+		console.log(codigo.length);
+
+		if (!/^\d+$/.test(codigo)) {
+			bootbox.alert("El código de barra debe contener solo números.");
+			return;
+		} else if (codigo.length !== 13) {
+			bootbox.alert("El código de barra debe tener 13 dígitos.");
+			return;
+		} else {
+			codigo = codigo.slice(0, 1) + " " + codigo.slice(1, 3) + " " + codigo.slice(3, 7) + " " + codigo.slice(7, 8) + " " + codigo.slice(8, 12) + " " + codigo.slice(12, 13);
+		}
+	} else {
+		var codigo = $("#codigo_barra").val()
+	}
+
+	if (codigo != "") {
+		JsBarcode("#barcode", codigo);
+		$("#codigo_barra").val(codigo);
+		$("#print").show();
+	} else {
+		$("#print").hide();
+	}
+}
+
+function convertirMayusProduct() {
+	var inputCodigo = document.getElementById("cod_part_1");
+	inputCodigo.value = inputCodigo.value.toUpperCase();
+}
+
+//Función para imprimir el código de barras
+function imprimir() {
+	$("#print").printArea();
+}
+
+
+
 function validarCaja() {
 	$.post("../ajax/proforma.php?op=validarCaja", function (e) {
+		e = limpiarCadena(e);
 		console.log(e);
 		const obj = JSON.parse(e);
 		console.log(obj);
 
 		if (e == "null") {
 			bootbox.alert("Usted debe registrar una caja para realizar la proforma.");
-		} else if (obj.estado != "aperturado") {
-			bootbox.alert("Usted necesita aperturar su caja para realizar la proforma.");
 		} else {
 			mostrarform(true);
 			actualizarCorrelativo();
@@ -168,7 +702,6 @@ function listarDatos() {
 		let personales = obj.personales || [];
 		let locales = obj.locales || [];
 
-		$("#productos").empty();
 		$("#categoria").empty();
 		$("#pagos").empty();
 
@@ -195,7 +728,6 @@ function listarTodosLosArticulos() {
 		let articulo = obj.articulo;
 		let servicio = obj.servicio;
 
-		$("#productos").empty();
 		listarArticulos(articulo, servicio);
 	});
 }
@@ -205,16 +737,20 @@ function listarArticulosPorCategoria(idcategoria) {
 		const articulos = JSON.parse(data).articulo || [];
 		console.log(articulos);
 
-		$("#productos").empty();
 		listarArticulos(articulos, []);
 	});
 }
 
 function listarArticulos(articulos, servicios) {
+	$("#productos").empty();
 	let productosContainer = $("#productos");
 
 	if ((articulos.length > 0 || servicios.length > 0) && !(articulos.length === 0 && servicios.length === 0)) {
 		articulos.forEach((articulo) => {
+
+			articulo.stock = +articulo.stock; // Convierte a número
+			articulo.stock_minimo = +articulo.stock_minimo; // Convierte a número
+
 			var stockHtml = (articulo.stock > 0 && articulo.stock < articulo.stock_minimo) ? '<span style="color: #Ea9900; font-weight: bold">' + articulo.stock + '</span>' : ((articulo.stock != '0') ? '<span style="color: #00a65a; font-weight: bold">' + articulo.stock + '</span>' : '<span style="color: red; font-weight: bold">' + articulo.stock + '</span>');
 			var labelHtml = (articulo.stock > 0 && articulo.stock < articulo.stock_minimo) ? '<span class="label bg-orange" style="width: min-content;">agotandose</span>' : ((articulo.stock != '0') ? '<span class="label bg-green" style="width: min-content;">Disponible</span>' : '<span class="label bg-red" style="width: min-content;">agotado</span>');
 
@@ -561,6 +1097,7 @@ function seleccionarProducto(selectElement) {
 let idarticuloGlobal = "";
 let nombreGlobal = "";
 let localGlobal = "";
+let stockGlobal = "";
 let precioCompraGlobal = "";
 let precioVentaGlobal = "";
 let comisionGlobal = "";
@@ -585,6 +1122,7 @@ function verificarEmpleado(tipoarticulo, idarticulo, nombre, local, stock, preci
 			idarticuloGlobal = idarticulo;
 			nombreGlobal = nombre;
 			localGlobal = local;
+			stockGlobal = stock;
 			precioCompraGlobal = precio_compra;
 			precioVentaGlobal = precio_venta;
 			comisionGlobal = comision;
@@ -597,7 +1135,7 @@ function verificarEmpleado(tipoarticulo, idarticulo, nombre, local, stock, preci
 
 			evaluarBotonEmpleado();
 		} else {
-			agregarDetalle(tipoarticulo, idarticulo, '0', nombre, local, precio_compra, precio_venta, comision, codigo);
+			agregarDetalle(tipoarticulo, idarticulo, '0', nombre, local, stock, precio_compra, precio_venta, comision, codigo);
 		}
 	} else {
 		bootbox.alert("No puedes agregar el mismo artículo o servicio dos veces.");
@@ -632,7 +1170,7 @@ function evaluarBotonEmpleado() {
 		$("#btnGuardarArticulo").show();
 		let textoSeleccionado = $("#idpersonal option:selected").text();
 		$("#empleadoSeleccionado").html(capitalizarTodasLasPalabras(textoSeleccionado));
-		$("#btnGuardarArticulo").attr("onclick", `agregarDetalle('${tipoProductoFinal}','${idarticuloGlobal}', '${valorEmpleado}', '${nombreGlobal}', '${localGlobal}', '${precioCompraGlobal}', '${precioVentaGlobal}', '${comisionGlobal}', '${codigoGlobal}'); limpiarModalEmpleados();`);
+		$("#btnGuardarArticulo").attr("onclick", `agregarDetalle('${tipoProductoFinal}','${idarticuloGlobal}', '${valorEmpleado}', '${nombreGlobal}', '${localGlobal}', '${stockGlobal}', '${precioCompraGlobal}', '${precioVentaGlobal}', '${comisionGlobal}', '${codigoGlobal}'); limpiarModalEmpleados();`);
 	}
 }
 
@@ -864,11 +1402,11 @@ function buscarSunat(e) {
 		success: function (datos) {
 			datos = limpiarCadena(datos);
 			console.log(datos);
-			if (datos == "DNI no encontrado" || datos == "RUC no encontrado") {
+			if (datos == "DNI no valido" || datos == "RUC no valido") {
 				limpiarModalClientes();
 				bootbox.confirm(datos + ", ¿deseas crear un cliente manualmente?", function (result) {
 					if (result) {
-						(datos == "DNI no encontrado") ? $("#tipo_documento4").val("DNI") : $("#tipo_documento4").val("RUC");
+						(datos == "DNI no valido") ? $("#tipo_documento4").val("DNI") : $("#tipo_documento4").val("RUC");
 
 						$("#tipo_documento4").trigger("change");
 
@@ -888,16 +1426,27 @@ function buscarSunat(e) {
 				const obj = JSON.parse(datos);
 				console.log(obj);
 
-				$("#nombre").val(obj.nombre);
+				if (obj.tipoDocumento == "1") {
+					var nombreCompleto = capitalizarTodasLasPalabras(obj.nombres + " " + obj.apellidoPaterno + " " + obj.apellidoMaterno);
+					var direccionCompleta = "";
+				} else {
+					var nombreCompleto = capitalizarTodasLasPalabras(obj.razonSocial);
+					var direccionCompleta = capitalizarTodasLasPalabras(obj.provincia + ", " + obj.distrito + ", " + obj.direccion);
+				}
+
+				console.log("Nombre completo es =) =>" + nombreCompleto);
+				console.log("Direccion completa es =) =>" + direccionCompleta);
+
+				$("#nombre").val(nombreCompleto);
 				$("#tipo_documento").val(obj.tipoDocumento == "1" ? "DNI" : "RUC");
 				$("#num_documento").val(obj.numeroDocumento);
-				$("#direccion").val(obj.direccion);
+				$("#direccion").val(direccionCompleta);
 				$("#telefono").val(obj.telefono);
 				$("#email").val(obj.email);
 
 				// Deshabilitar los campos solo si están vacíos
-				$("#nombre").prop("disabled", obj.hasOwnProperty("nombre") && obj.nombre !== "" ? true : false);
-				$("#direccion").prop("disabled", obj.hasOwnProperty("direccion") && obj.direccion !== "" ? true : false);
+				$("#nombre").prop("disabled", (obj.hasOwnProperty("nombres") || obj.hasOwnProperty("razonSocial")) && nombreCompleto !== "" ? true : false);
+				$("#direccion").prop("disabled", obj.hasOwnProperty("direccion") && direccionCompleta !== "" ? true : false);
 				$("#telefono").prop("disabled", obj.hasOwnProperty("telefono") && obj.telefono !== "" ? true : false);
 				$("#email").prop("disabled", obj.hasOwnProperty("email") && obj.email !== "" ? true : false);
 
@@ -1297,9 +1846,11 @@ function mostrarform(flag) {
 function cancelarform() {
 	limpiar();
 	mostrarform(false);
-	// setTimeout(() => {
-	// 	document.querySelector(".sidebar-toggle").click();
-	// }, 500);
+}
+
+function cancelarform2() {
+	limpiarModalArticulos();
+	$("#myModal12").modal("hide");
 }
 
 function listar() {
@@ -1313,10 +1864,10 @@ function listar() {
 
 	tabla = $('#tbllistado').dataTable(
 		{
-			"lengthMenu": [10, 25, 50, 100],//mostramos el menú de registros a revisar
-			"aProcessing": true,//Activamos el procesamiento del datatables
-			"aServerSide": true,//Paginación y filtrado realizados por el servidor
-			dom: '<Bl<f>rtip>',//Definimos los elementos del control de tabla
+			"lengthMenu": [10, 25, 50, 100],
+			"aProcessing": true,
+			"aServerSide": true,
+			dom: '<Bl<f>rtip>',
 			buttons: [
 				'copyHtml5',
 				'excelHtml5',
@@ -1359,7 +1910,7 @@ function listar() {
 			"iDisplayLength": 10,//Paginación
 			"order": [],
 			"createdRow": function (row, data, dataIndex) {
-				$(row).find('td:eq(0), td:eq(1), td:eq(2), td:eq(3), td:eq(4), td:eq(5), td:eq(6), td:eq(7), td:eq(8), td:eq(9), td:eq(10)').addClass('nowrap-cell');
+				// $(row).find('td:eq(0), td:eq(1), td:eq(2), td:eq(4), td:eq(5), td:eq(6), td:eq(7), td:eq(8), td:eq(9), td:eq(10)').addClass('nowrap-cell');
 			}
 		}).DataTable();
 }
@@ -1425,7 +1976,7 @@ function buscar() {
 			"iDisplayLength": 10,
 			"order": [],
 			"createdRow": function (row, data, dataIndex) {
-				$(row).find('td:eq(0), td:eq(1), td:eq(2), td:eq(3), td:eq(4), td:eq(5), td:eq(6), td:eq(7), td:eq(8), td:eq(9), td:eq(10)').addClass('nowrap-cell');
+				// $(row).find('td:eq(0), td:eq(1), td:eq(2), td:eq(4), td:eq(5), td:eq(6), td:eq(7), td:eq(8), td:eq(9), td:eq(10)').addClass('nowrap-cell');
 			}
 		}).DataTable();
 }
@@ -1476,18 +2027,20 @@ function guardaryeditar(e) {
 
 			} catch (e) {
 				// Si la conversión a JSON falla, datos es probablemente una cadena.
-				if (!datos) {
-					console.log(datos);
-					console.log("No se recibieron datos del servidor.");
-					return;
-				} else if (datos == "Una de las cantidades superan al stock normal del artículo o servicio." || datos == "El subtotal de uno de los artículos o servicios no puede ser menor a 0." || datos == "El precio de venta de uno de los artículos o servicios no puede ser menor al precio de compra." || "El número correlativo que ha ingresado ya existe en el local seleccionado.") {
-					console.log(datos);
-					console.log(typeof (datos));
-					bootbox.alert(datos);
-					return;
+				console.log(datos);
+				console.log(typeof (datos));
+				if (datos == "Uno de los productos no forman parte del local seleccionado.") {
+					console.log("entro al if =)");
+
+					var local = $("#idlocal_session option:selected").text();
+					var localLimpiado = local.replace(/ - \d{3,}.*/, '');
+
+					bootbox.alert(datos + " Debe asegurarse de seleccionar solo los productos que sean del local: <strong>" + localLimpiado + "</strong>.");
 				} else {
-					console.log(datos);
+					bootbox.alert(datos);
 				}
+
+				return;
 			}
 		},
 	});
@@ -1560,7 +2113,7 @@ function limpiarModalPrecuentaFinal() {
 
 // FUNCIONES Y BOTONES DE LAS VENTAS
 
-function modalDetalles(idproforma, usuario, num_comprobante, cliente, cliente_tipo_documento, cliente_num_documento, cliente_direccion, impuesto, total_venta, vuelto) {
+function modalDetalles(idproforma, usuario, num_comprobante, cliente, cliente_tipo_documento, cliente_num_documento, cliente_direccion, impuesto, total_venta, vuelto, comentario_interno) {
 	$.post("../ajax/proforma.php?op=listarDetallesProductoVenta", { idproforma: idproforma }, function (data, status) {
 		console.log(data);
 		data = JSON.parse(data);
@@ -1631,6 +2184,9 @@ function modalDetalles(idproforma, usuario, num_comprobante, cliente, cliente_ti
 		$('#vueltos_pagos').text(vuelto);
 		$('#total_pagos').text(total_venta);
 
+		let comentario_val = comentario_interno == "" ? "Sin registrar." : comentario_interno;
+
+		$('#comentario_interno_detalle').text(comentario_val);
 		$('#atendido_venta').text(capitalizarTodasLasPalabras(usuario));
 	});
 }
@@ -1741,7 +2297,7 @@ var detalles = 0;
 
 // $("#btnGuardar").hide();
 
-function agregarDetalle(tipoproducto, idarticulo, idpersonal, nombre, local, precio_compra, precio_venta, comision, codigo) {
+function agregarDetalle(tipoproducto, idarticulo, idpersonal, nombre, local, stock, precio_compra, precio_venta, comision, codigo) {
 	var cantidad = 1;
 	var descuento = '0.00';
 
@@ -1758,7 +2314,8 @@ function agregarDetalle(tipoproducto, idarticulo, idpersonal, nombre, local, pre
 		var fila2 = '<tr class="filas fila' + cont + ' principal2">' +
 			'<td class="nowrap-cell" style="text-align: start !important;"><input type="hidden" name="' + (tipoproducto == "producto" ? "idarticulo[]" : "idservicio[]") + '" value="' + idarticulo + '"><input type="hidden" step="any" name="precio_compra[]" value="' + precio_compra + '"><input type="hidden" name="idpersonal[]" value="' + idpersonal + '"><input type="hidden" name="comision[]" value="' + comision + '">' + codigo + '</td>' +
 			'<td style="text-align: start !important;">' + capitalizarTodasLasPalabras(nombre) + '</td>' +
-			'<td style="text-align: start !important;">' + capitalizarTodasLasPalabras(local) + '</td>' +
+			'<td style="text-align: start !important;"><strong>' + capitalizarTodasLasPalabras(local) + '</strong></td>' +
+			'<td style="text-align: start !important;">' + (tipoproducto == "producto" ? stock : "") + '</td>' +
 			'<td><div style="display: flex; align-items: center; justify-content: center;"><input type="number" class="form-control" step="any" name="precio_venta[]" oninput="modificarSubototales2();" id="precio_venta[]" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" required value="' + (precio_venta == '' ? parseFloat(0).toFixed(2) : precio_venta) + '"></div></td>' +
 			'<td><div style="display: flex; align-items: center; justify-content: center;"><input type="number" class="form-control" step="any" name="descuento[]" oninput="modificarSubototales2();" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="0" required value="' + descuento + '"></div></td>' +
 			'<td><div style="display: flex; align-items: center; justify-content: center;"><input type="number" class="form-control" name="cantidad[]" id="cantidad[]" oninput="modificarSubototales2();" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" required value="' + cantidad + '"></div></td>' +

@@ -36,12 +36,12 @@ if (!isset($_SESSION["nombre"])) {
                 <table id="tbllistado" class="table table-striped table-bordered table-condensed table-hover w-100" style="width: 100% !important;">
                   <thead>
                     <th style="width: 1%;">Opciones</th>
-                    <th>Nombre</th>
-                    <th style="width: 40%; min-width: 280px; white-space: nowrap;">Descripción del método de pago</th>
-                    <th style="white-space: nowrap;">Agregado por</th>
+                    <th style="width: 10%; min-width: 160px;">Nombre</th>
+                    <th style="width: 30%; min-width: 280px;">Descripción</th>
+                    <th>Agregado por</th>
                     <th>Cargo</th>
                     <th>Foto</th>
-                    <th style="white-space: nowrap;">Fecha y hora</th>
+                    <th>Fecha y hora</th>
                     <th>Estado</th>
                   </thead>
                   <tbody>
@@ -49,7 +49,7 @@ if (!isset($_SESSION["nombre"])) {
                   <tfoot>
                     <th>Opciones</th>
                     <th>Nombre</th>
-                    <th>Descripción del método de pago</th>
+                    <th>Descripción</th>
                     <th>Agregado por</th>
                     <th>Cargo</th>
                     <th>Foto</th>
@@ -66,14 +66,14 @@ if (!isset($_SESSION["nombre"])) {
                     <input type="text" class="form-control" name="titulo" id="titulo" maxlength="40" placeholder="Ingrese el nombre del método de pago." autocomplete="off" required>
                   </div>
                   <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                    <label>Imagen(*):</label>
-                    <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg" required>
+                    <label>Imagen:</label>
+                    <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg">
                     <input type="hidden" name="imagenactual" id="imagenactual">
-                    <img src="" width="150px" id="imagenmuestra">
+                    <img src="" width="150px" id="imagenmuestra" style="display: none;">
                   </div>
                   <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <label>Descripción:</label>
-                    <textarea type="text" class="form-control" name="descripcion" id="descripcion" maxlength="150" rows="4" placeholder="Ingrese una descripción."></textarea>
+                    <textarea type="text" class="form-control" name="descripcion" id="descripcion" maxlength="1000" rows="4" placeholder="Ingrese una descripción."></textarea>
                   </div>
                   <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <button class="btn btn-warning" onclick="cancelarform()" type="button"><i class="fa fa-arrow-circle-left"></i> Cancelar</button>

@@ -13,7 +13,7 @@ if (!isset($_SESSION["nombre"])) {
     <style>
       .marco {
         background-color: white;
-        border-top: 3px #3686b4 solid;
+        border-top: 3px #002a8e solid !important;
       }
     </style>
 
@@ -39,8 +39,8 @@ if (!isset($_SESSION["nombre"])) {
                       <input type="text" class="form-control" name="titulo" id="titulo" maxlength="30" placeholder="Ingrese el nombre de la empresa." required>
                     </div>
                     <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                      <label>Desarrollado por(*):</label>
-                      <input type="text" class="form-control" name="auspiciado" id="auspiciado" maxlength="25" placeholder="Ingrese el nombre de la empresa desarrolladora." required>
+                      <label>Desarrollado por:</label>
+                      <input type="text" class="form-control" name="auspiciado" id="auspiciado" maxlength="25" placeholder="Ingrese el nombre de la empresa desarrolladora.">
                     </div>
                     <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                       <label>RUC(*):</label>
@@ -48,7 +48,7 @@ if (!isset($_SESSION["nombre"])) {
                     </div>
                     <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                       <label>Dirección:</label>
-                      <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección." maxlength="50">
+                      <input type="text" class="form-control" name="direccion" id="direccion" placeholder="Ingrese la dirección." maxlength="80">
                     </div>
                     <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
                       <label>Teléfono:</label>
@@ -62,7 +62,7 @@ if (!isset($_SESSION["nombre"])) {
                       <label>Logo:</label>
                       <input type="file" class="form-control" name="imagen" id="imagen" accept="image/x-png,image/gif,image/jpeg">
                       <input type="hidden" name="imagenactual" id="imagenactual"><br>
-                      <img src="" width="150px" id="imagenmuestra">
+                      <img src="" width="150px" id="imagenmuestra" style="display: none;">
                     </div>
                     <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-bottom: 0;">
                       <button class="btn btn-bcp" type="submit" id="btnGuardar"><i class="fa fa-save"></i> Guardar</button>

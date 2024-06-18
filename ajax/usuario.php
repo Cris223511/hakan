@@ -5,7 +5,9 @@ if (strlen(session_id()) < 1) {
 }
 
 if (empty($_SESSION['idusuario']) && empty($_SESSION['cargo']) && $_GET["op"] !== 'verificar') {
-	echo json_encode(['error' => 'No está autorizado para realizar esta acción.']);
+	session_unset();
+	session_destroy();
+	header("Location: ../vistas/login.html");
 	exit();
 }
 
@@ -159,18 +161,18 @@ switch ($_GET["op"]) {
 
 					$data[] = array(
 						"0" => '<div style="display: flex; flex-wrap: nowrap; gap: 3px">' .
-							(!($reg->cargo == "superadmin" && $_SESSION['cargo'] == 'admin') ?
+							(!(($reg->cargo == "superadmin" && $_SESSION['cargo'] == 'admin') || ($reg->cargo == "admin_total" && $_SESSION['cargo'] == 'admin') || ($reg->cargo == "superadmin" && $_SESSION['cargo'] == 'admin_total')) ?
 								((($reg->estado) ?
 									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px;" onclick="mostrar(' . $reg->idusuario . '); verificarCargo(\'' . $reg->cargo . '\');"><i class="fa fa-pencil"></i></button>') : '') .
 									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="margin-right: 3px; height: 35px;" onclick="desactivar(' . $reg->idusuario . ')"><i class="fa fa-close"></i></button>') : '') .
 									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '') : (($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px; height: 35px;" onclick="mostrar(' . $reg->idusuario . '); verificarCargo(\'' . $reg->cargo . '\');"><i class="fa fa-pencil"></i></button>') : '') .
 									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-success" style="margin-right: 3px; width: 35px; height: 35px; padding: 0;" onclick="activar(' . $reg->idusuario . ')"><i style="margin-left: -2px" class="fa fa-check"></i></button>') : '') .
 									(($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin_total' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '')) . '</div>') : ("")),
-						"1" => $reg->login,
-						"2" => $cargo_detalle,
-						"3" => $reg->local,
-						"4" => "N° " . $reg->local_ruc,
-						"5" => $reg->nombre,
+						"1" => $reg->nombre,
+						"2" => $reg->login,
+						"3" => $cargo_detalle,
+						"4" => $reg->local,
+						"5" => "N° " . $reg->local_ruc,
 						"6" => $reg->tipo_documento,
 						"7" => $reg->num_documento,
 						"8" => $telefono,
@@ -358,6 +360,7 @@ switch ($_GET["op"]) {
 			in_array(13, $valores) ? $_SESSION['reportesM'] = 1 : $_SESSION['reportesM'] = 0;
 			in_array(14, $valores) ? $_SESSION['reportesE'] = 1 : $_SESSION['reportesE'] = 0;
 			in_array(15, $valores) ? $_SESSION['comisiones'] = 1 : $_SESSION['comisiones'] = 0;
+			in_array(16, $valores) ? $_SESSION['PExternos'] = 1 : $_SESSION['PExternos'] = 0;
 		}
 		echo json_encode($fetch);
 		break;

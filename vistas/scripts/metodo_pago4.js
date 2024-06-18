@@ -30,7 +30,6 @@ function mostrarform(flag) {
 		$("#formularioregistros").show();
 		$("#btnGuardar").prop("disabled", false);
 		$("#btnagregar").hide();
-		$("#imagen").attr("required", true);
 	}
 	else {
 		$("#listadoregistros").show();
@@ -90,7 +89,7 @@ function listar() {
 			"iDisplayLength": 5,
 			"order": [],
 			"createdRow": function (row, data, dataIndex) {
-				$(row).find('td:eq(0), td:eq(1), td:eq(3), td:eq(4), td:eq(5), td:eq(6)').addClass('nowrap-cell');
+				// $(row).find('td:eq(0), td:eq(1), td:eq(3), td:eq(4), td:eq(5), td:eq(6)').addClass('nowrap-cell');
 			}
 		}).DataTable();
 }
