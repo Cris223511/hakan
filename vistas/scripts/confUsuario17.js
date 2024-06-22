@@ -6,6 +6,8 @@ function init() {
 
 	$('#mPerfilUsuario').addClass("treeview active");
 	$('#lConfUsuario').addClass("active");
+	
+	mostrar();
 }
 
 function guardaryeditar(e) {

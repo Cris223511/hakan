@@ -9,7 +9,6 @@ $rspta = $perfil->mostrarReporte();
 $logo = $rspta["imagen"];
 $ext_logo = strtolower(pathinfo($rspta["imagen"], PATHINFO_EXTENSION));
 $empresa = $rspta["titulo"];
-$auspiciado = $rspta["auspiciado"];
 $ruc = ($rspta["ruc"] == '') ? 'Sin registrar' : $rspta["ruc"];
 $direccion = ($rspta["direccion"] == '') ? 'Sin registrar' : $rspta["direccion"];
 $telefono = ($rspta["telefono"] == '') ? 'Sin registrar' : number_format($rspta["telefono"], 0, '', ' ');
@@ -18,9 +17,9 @@ $email = ($rspta["email"] == '') ? 'Sin registrar' : $rspta["email"];
 require('../modelos/Venta.php');
 $venta = new Venta();
 
-$rspta1 = $venta->listarDetallesVenta($_GET["id"]);
-$rspta2 = $venta->listarDetallesProductoVenta($_GET["id"]);
-$rspta3 = $venta->listarDetallesMetodosPagoVenta($_GET["id"]);
+$rspta1 = $venta->listarDetallesVenta($_GET["id"] ?? 0);
+$rspta2 = $venta->listarDetallesProductoVenta($_GET["id"] ?? 0);
+$rspta3 = $venta->listarDetallesMetodosPagoVenta($_GET["id"] ?? 0);
 
 $reg1 = $rspta1->fetch_object();
 
@@ -44,8 +43,6 @@ $pdf->encabezado1(
     $reg1->num_comprobante ?? '',
     $reg1->fecha_hora ?? '',
     $reg1->tipo_comprobante ?? '',
-    $reg1->local ?? '',
-    $reg1->local_ruc ?? '',
     $reg1->estado ?? '',
 );
 
@@ -56,16 +53,18 @@ $pdf->Ln(1);
 $pdf->SetX(1.5);
 $pdf->Cell(0, -2, utf8_decode("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"), 0, 0, 'L');
 
-$y += 58;
+$y += 42;
 
 # Encabezado y datos del ticket #
 $pdf->encabezado2(
     $y,
-    "CLIENTE: " . $reg1->cliente ?? '',
+    "CLIENTE: " . ($reg1->cliente ?? ''),
     ($reg1->telefono  ?? '' != "") ? number_format($reg1->telefono, 0, '', ' ') : '',
     $reg1->tipo_documento ?? '',
     $reg1->num_documento ?? '',
 );
+
+$pdf->SetFont('hypermarket', '', 10);
 
 # Separador #
 $pdf->Ln(3);
@@ -122,7 +121,7 @@ $anchoColumnaProducto = 20;
 while ($reg2 = $rspta2->fetch_object()) {
     $subtotal = ($reg2->cantidad * $reg2->precio_venta) - $reg2->descuento;
 
-    $textoProducto = utf8_decode(($reg2->articulo != "") ? mb_strtoupper($reg2->articulo) : mb_strtoupper($reg2->servicio));
+    $textoProducto = mb_strtoupper($reg2->articulo);
     $anchoTexto = $pdf->GetStringWidth($textoProducto);
 
     $line = array(
@@ -353,7 +352,6 @@ $y = $pdf->pie(
     $y,
     $reg1->usuario ?? '',
     $reg1->comentario_externo ?? '',
-    $auspiciado,
 );
 
 $y += 4;
@@ -373,9 +371,6 @@ QRcode::png($codeText, $filePath, $level, $size ?? 0);
 $pdf->Image($filePath, 20, null, 30);
 
 unlink($filePath);
-
-# Caja #
-$pdf->caja($y, $reg1->caja ?? '');
 
 # Créditos #
 $pdf->creditos(

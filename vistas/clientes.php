@@ -70,9 +70,11 @@ if (!isset($_SESSION["nombre"])) {
             <div class="box">
               <div class="box-header with-border">
                 <h1 class="box-title">Clientes
-                  <button class="btn btn-bcp" id="btnagregar" onclick="mostrarform(true)">
-                    <i class="fa fa-plus-circle"></i> Agregar
-                  </button>
+                  <?php if ($_SESSION["cargo"] == "admin" || $_SESSION["cargo"] == "vendedor") { ?>
+                    <button class="btn btn-bcp" id="btnagregar" onclick="mostrarform(true)">
+                      <i class="fa fa-plus-circle"></i> Agregar
+                    </button>
+                  <?php } ?>
                   <?php if ($_SESSION["cargo"] == "admin") { ?>
                     <a href="../reportes/rptclientes.php" target="_blank">
                       <button class="btn btn-secondary" style="color: black !important;">
@@ -80,7 +82,7 @@ if (!isset($_SESSION["nombre"])) {
                       </button>
                     </a>
                   <?php } ?>
-                  <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Clientes</strong>" data-html="true" data-content="Módulo para registrar los clientes para que sean utilizados en las ventas y proformas.<br><br><strong>Nota:</strong> Solo visualizará los clientes de su local, de la cual, los clientes que registre serán visibles y utilizados por los trabajadores <strong>de su local</strong> (solo puede editar, anular y eliminar los clientes que ustéd agrega y no el de los demás)." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
+                  <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Clientes</strong>" data-html="true" data-content="Módulo para registrar los clientes para que sean utilizados en las ventas y proformas." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
                 </h1>
                 <div class="box-tools pull-right">
                 </div>
@@ -90,7 +92,6 @@ if (!isset($_SESSION["nombre"])) {
                   <thead>
                     <th style="width: 1%;">Opciones</th>
                     <th style="width: 20%; min-width: 220px;">Nombres</th>
-                    <th style="width: 30%; min-width: 200px;">Almacén</th>
                     <th>Tipo Doc.</th>
                     <th>Número Doc.</th>
                     <th style="width: 30%; min-width: 200px;">Dirección</th>
@@ -108,7 +109,6 @@ if (!isset($_SESSION["nombre"])) {
                   <tfoot>
                     <th>Opciones</th>
                     <th>Nombres</th>
-                    <th>Almacén</th>
                     <th>Tipo Doc.</th>
                     <th>Número Doc.</th>
                     <th>Dirección</th>
@@ -129,16 +129,6 @@ if (!isset($_SESSION["nombre"])) {
                     <label>Nombre(*):</label>
                     <input type="hidden" name="idcliente" id="idcliente">
                     <input type="text" class="form-control" name="nombre" id="nombre" maxlength="40" placeholder="Ingrese el nombre del cliente." autocomplete="off" required>
-                  </div>
-                  <div class="form-group col-lg-6 col-md-12">
-                    <label>Local(*):</label>
-                    <select id="idlocal" name="idlocal" class="form-control selectpicker idlocal" data-live-search="true" data-size="5" onchange="actualizarRUC()" required>
-                      <option value="">- Seleccione -</option>
-                    </select>
-                  </div>
-                  <div class="form-group col-lg-6 col-md-12">
-                    <label>RUC local(*):</label>
-                    <input type="number" class="form-control" id="local_ruc" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="11" placeholder="RUC del local" disabled>
                   </div>
                   <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <label>Dirección:</label>
@@ -193,16 +183,16 @@ if (!isset($_SESSION["nombre"])) {
             </div>
           </div>
           <div class="panel-body">
-            <div class="col-lg-6 col-md-6 col-sm-6" style="padding: 0;">
+            <div class="col-lg-12 col-md-12 col-sm-12" style="padding: 0;">
               <div style="margin: 5px;">
-                <button class="btn btn-secondary btn-ventas" style="width: 100%; text-align: center; font-weight: bold;" type="button" data-idcliente="" data-nombre="" data-tipo-documento="" data-num-documento="" data-local="">VER HISTORIAL DE VENTAS</button>
+                <button class="btn btn-secondary btn-ventas" style="width: 100%; text-align: center; font-weight: bold;" type="button" data-idcliente="" data-nombre="" data-tipo-documento="" data-num-documento="">VER HISTORIAL DE VENTAS</button>
               </div>
             </div>
-            <div class="col-lg-6 col-md-6 col-sm-6" style="padding: 0;">
+            <!-- <div class="col-lg-6 col-md-6 col-sm-6" style="padding: 0;">
               <div style="margin: 5px;">
-                <button class="btn btn-secondary btn-proformas" style="width: 100%; text-align: center; font-weight: bold;" type="button" data-idcliente="" data-nombre="" data-tipo-documento="" data-num-documento="" data-local="">VER HISTORIAL DE COTIZACIONES</button>
+                <button class="btn btn-secondary btn-proformas" style="width: 100%; text-align: center; font-weight: bold;" type="button" data-idcliente="" data-nombre="" data-tipo-documento="" data-num-documento="">VER HISTORIAL DE COTIZACIONES</button>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -227,8 +217,6 @@ if (!isset($_SESSION["nombre"])) {
                   <th style="width: 1%;">Opciones</th>
                   <th>PDF</th>
                   <th>Fecha y hora</th>
-                  <th style="width: 15%; min-width: 200px;">Almacén</th>
-                  <th>Caja</th>
                   <th>Documento</th>
                   <th>Número Ticket</th>
                   <th>Total Venta (S/.)</th>
@@ -241,8 +229,6 @@ if (!isset($_SESSION["nombre"])) {
                   <th>Opciones</th>
                   <th>PDF</th>
                   <th>Fecha y hora</th>
-                  <th>Almacén</th>
-                  <th>Caja</th>
                   <th>Documento</th>
                   <th>Número Ticket</th>
                   <th>Total Venta (S/.)</th>
@@ -365,8 +351,6 @@ if (!isset($_SESSION["nombre"])) {
                   <th style="width: 1%;">Opciones</th>
                   <th>PDF</th>
                   <th>Fecha y hora</th>
-                  <th style="width: 15%; min-width: 200px;">Almacén</th>
-                  <th>Caja</th>
                   <th>Documento</th>
                   <th>Número Ticket</th>
                   <th>Total Venta (S/.)</th>
@@ -379,8 +363,6 @@ if (!isset($_SESSION["nombre"])) {
                   <th>Opciones</th>
                   <th>PDF</th>
                   <th>Fecha y hora</th>
-                  <th style="width: 15%; min-width: 200px;">Almacén</th>
-                  <th>Caja</th>
                   <th>Documento</th>
                   <th>Número Ticket</th>
                   <th>Total Venta (S/.)</th>

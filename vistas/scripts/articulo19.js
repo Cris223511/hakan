@@ -1,9 +1,7 @@
 var tabla;
 
-var idlocal = 0;
-
-function actualizarCorrelativo(idlocal) {
-	$.post("../ajax/articulo.php?op=getLastCodigo", { idlocal: idlocal.value }, function (num) {
+function actualizarCorrelativo() {
+	$.post("../ajax/articulo.php?op=getLastCodigo", function (num) {
 		console.log(num);
 		const partes = num.match(/([a-zA-Z]+)(\d+)/) || ["", "", ""];
 
@@ -26,10 +24,6 @@ function init() {
 		guardaryeditar(e);
 	})
 
-	$("#formulario2").on("submit", function (e) {
-		guardaryeditar2(e);
-	})
-
 	$("#imagenmuestra").hide();
 	$('#mAlmacen').addClass("treeview active");
 	$('#lArticulos').addClass("active");
@@ -40,10 +34,7 @@ function init() {
 		console.log(obj);
 
 		const selects = {
-			"idmarca": $("#idmarca, #idmarcaBuscar"),
 			"idcategoria": $("#idcategoria, #idcategoriaBuscar"),
-			"idlocal": $("#idlocal"),
-			"idmedida": $("#idmedida"),
 		};
 
 		for (const selectId in selects) {
@@ -55,30 +46,15 @@ function init() {
 					select.empty();
 					select.html('<option value="">- Seleccione -</option>');
 					obj[atributo].forEach(function (opcion) {
-						if (atributo != "local") {
-							select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
-						} else {
-							select.append('<option value="' + opcion.id + '" data-local-ruc="' + opcion.ruc + '">' + opcion.titulo + '</option>');
-						}
+						select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
 					});
 					select.selectpicker('refresh');
 				}
 			}
 		}
 
-		$("#idlocal").val($("#idlocal option:first").val());
-		$("#idlocal").selectpicker('refresh');
-
 		$('#idcategoria').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregarCategoria(event)');
 		$('#idcategoria').closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
-
-		$('#idmarca').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregarMarca(event)');
-		$('#idmarca').closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
-
-		$('#idmedida').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregarMedida(event)');
-		$('#idmedida').closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
-
-		actualizarRUC();
 	});
 }
 
@@ -93,9 +69,7 @@ function listarTodosActivos(selectId) {
 			select.empty();
 			select.html('<option value="">- Seleccione -</option>');
 			obj[atributo].forEach(function (opcion) {
-				if (atributo !== "almacen") {
-					select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
-				}
+				select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
 			});
 			select.selectpicker('refresh');
 		}
@@ -146,158 +120,41 @@ function agregarCategoria(e) {
 	}
 }
 
-function agregarMarca(e) {
-	let inputValue = $('#idmarca').closest('.form-group').find('input[type="text"]');
-
-	if (e.key === "Enter") {
-		if ($('.no-results').is(':visible')) {
-			e.preventDefault();
-			$("#titulo3").val(inputValue.val());
-
-			var formData = new FormData($("#formularioMarcas")[0]);
-
-			$.ajax({
-				url: "../ajax/marcas.php?op=guardaryeditar",
-				type: "POST",
-				data: formData,
-				contentType: false,
-				processData: false,
-
-				success: function (datos) {
-					datos = limpiarCadena(datos);
-					if (!datos) {
-						console.log("No se recibieron datos del servidor.");
-						return;
-					} else if (datos == "El nombre de la marca que ha ingresado ya existe.") {
-						bootbox.alert(datos);
-						return;
-					} else {
-						// bootbox.alert(datos);
-						listarTodosActivos("idmarca");
-						$("#idmarca3").val("");
-						$("#titulo3").val("");
-						$("#descripcion3").val("");
-					}
-				}
-			});
-		}
-	}
-}
-
-function agregarMedida(e) {
-	let inputValue = $('#idmedida').closest('.form-group').find('input[type="text"]');
-
-	if (e.key === "Enter") {
-		if ($('.no-results').is(':visible')) {
-			e.preventDefault();
-			$("#titulo4").val(inputValue.val());
-
-			var formData = new FormData($("#formularioMedidas")[0]);
-
-			$.ajax({
-				url: "../ajax/medidas.php?op=guardaryeditar",
-				type: "POST",
-				data: formData,
-				contentType: false,
-				processData: false,
-
-				success: function (datos) {
-					datos = limpiarCadena(datos);
-					if (!datos) {
-						console.log("No se recibieron datos del servidor.");
-						return;
-					} else if (datos == "El nombre de la medida que ha ingresado ya existe.") {
-						bootbox.alert(datos);
-						return;
-					} else {
-						// bootbox.alert(datos);
-						listarTodosActivos("idmedida");
-						$("#idmedida4").val("");
-						$("#titulo4").val("");
-						$("#descripcion4").val("");
-					}
-				}
-			});
-		}
-	}
-}
-
-function changeGanancia() {
-	let precio_venta = $("#precio_venta").val();
-	let precio_compra = $("#precio_compra").val();
-
-	// Verificar si ambos campos están llenos
-	if (precio_venta !== '' && precio_compra !== '') {
-		let ganancia = precio_venta - precio_compra;
-		$("#ganancia").val(ganancia.toFixed(2));
-	}
-}
-
-function actualizarRUC() {
-	const selectLocal = document.getElementById("idlocal");
-	const localRUCInput = document.getElementById("local_ruc");
-	const selectedOption = selectLocal.options[selectLocal.selectedIndex];
-
-	if (selectedOption.value !== "") {
-		const localRUC = selectedOption.getAttribute('data-local-ruc');
-		localRUCInput.value = localRUC;
-	} else {
-		localRUCInput.value = "";
-	}
-}
-
 //Función limpiar
 function limpiar() {
 	$("#codigo_barra").val("");
 	$("#cod_part_1").val("");
 	$("#cod_part_2").val("");
 	$("#nombre").val("");
-	$("#local_ruc").val("");
 	$("#descripcion").val("");
 	$("#talla").val("");
 	$("#color").val("");
-	$("#peso").val("");
 	$("#stock").val("");
 	$("#stock_minimo").val("");
 	$("#imagenmuestra").attr("src", "");
 	$("#imagenmuestra").hide();
 	$("#imagenactual").val("");
 	$("#imagen").val("");
-	$("#precio_compra").val("");
 	$("#precio_venta").val("");
-	$("#ganancia").val("0.00");
-	$("#comision").val("");
 	$("#print").hide();
 	$("#idarticulo").val("");
 
 	$("#idcategoria").val($("#idcategoria option:first").val());
 	$("#idcategoria").selectpicker('refresh');
-	$("#idlocal").val($("#idlocal option:first").val());
-	$("#idlocal").selectpicker('refresh');
-	$("#idmarca").val($("#idmarca option:first").val());
-	$("#idmarca").selectpicker('refresh');
-	$("#idmedida").val($("#idmedida option:first").val());
-	$("#idmedida").selectpicker('refresh');
-	actualizarRUC();
 
-	$(".btn1").show();
-	$(".btn2").hide();
-
-	detenerEscaneo();
+	// detenerEscaneo();
 }
 
 //Función mostrar formulario
 function mostrarform(flag) {
 	limpiar();
+	actualizarCorrelativo();
 	if (flag) {
 		$(".listadoregistros").hide();
 		$("#formularioregistros").show();
 		$("#btnGuardar").prop("disabled", false);
 		$("#btnagregar").hide();
 		$("#btncomisiones").hide();
-		$(".caja1").hide();
-		$(".caja2").removeClass("col-lg-10 col-md-8 col-sm-12").addClass("col-lg-12 col-md-12 col-sm-12");
-		$(".botones").removeClass("col-lg-10 col-md-8 col-sm-12").addClass("col-lg-12 col-md-12 col-sm-12");
 		$("#btnDetalles1").show();
 		$("#btnDetalles2").hide();
 		$("#frmDetalles").hide();
@@ -307,9 +164,6 @@ function mostrarform(flag) {
 		$("#formularioregistros").hide();
 		$("#btnagregar").show();
 		$("#btncomisiones").show();
-		$(".caja1").show();
-		$(".caja2").removeClass("col-lg-12 col-md-12 col-sm-12").addClass("col-lg-10 col-md-8 col-sm-12");
-		$(".botones").removeClass("col-lg-12 col-md-12 col-sm-12").addClass("col-lg-10 col-md-8 col-sm-12");
 		$("#btnDetalles1").show();
 		$("#btnDetalles2").hide();
 		$("#frmDetalles").hide();
@@ -330,7 +184,6 @@ function cancelarform() {
 
 //Función Listar
 function listar() {
-	let param1 = "";
 	let param2 = "";
 	let param3 = "";
 
@@ -362,7 +215,7 @@ function listar() {
 			{
 				url: '../ajax/articulo.php?op=listar',
 				type: "get",
-				data: { param1: param1, param2: param2, param3: param3 },
+				data: { param2: param2, param3: param3 },
 				dataType: "json",
 				error: function (e) {
 					console.log(e.responseText);
@@ -392,34 +245,17 @@ function listar() {
 function guardaryeditar(e) {
 	e.preventDefault(); //No se activará la acción predeterminada del evento
 
-	var codigoBarra = $("#codigo_barra").val();
+	// var codigoBarra = $("#codigo_barra").val();
 
-	var formatoValido = /^[0-9]{1} [0-9]{2} [0-9]{4} [0-9]{1} [0-9]{4} [0-9]{1}$/.test(codigoBarra);
+	// var formatoValido = /^[0-9]{1} [0-9]{2} [0-9]{4} [0-9]{1} [0-9]{4} [0-9]{1}$/.test(codigoBarra);
 
-	if (!formatoValido && codigoBarra != "") {
-		bootbox.alert("El formato del código de barra no es válido. El formato correcto es: X XX XXXX X XXXX X");
-		$("#btnGuardar").prop("disabled", false);
-		return;
-	}
-
-	// var stock = parseFloat($("#stock").val());
-	// var stock_minimo = parseFloat($("#stock_minimo").val());
-
-	// if (stock_minimo > stock) {
-	// 	bootbox.alert("El stock mínimo no puede ser mayor que el stock normal.");
+	// if (!formatoValido && codigoBarra != "") {
+	// 	bootbox.alert("El formato del código de barra no es válido. El formato correcto es: X XX XXXX X XXXX X");
+	// 	$("#btnGuardar").prop("disabled", false);
 	// 	return;
 	// }
 
-	var precio_compra = parseFloat($("#precio_compra").val());
-	var precio_venta = parseFloat($("#precio_venta").val());
-
-	if (precio_compra > precio_venta) {
-		bootbox.alert("El precio de compra no puede ser mayor que el precio de venta.");
-		return;
-	}
-
 	$("#btnGuardar").prop("disabled", true);
-	$("#ganancia").prop("disabled", false);
 
 	formatearNumeroCorrelativo();
 
@@ -430,15 +266,11 @@ function guardaryeditar(e) {
 	var formData = new FormData($("#formulario")[0]);
 	formData.append("codigo_producto", codigoCompleto);
 
-	$("#ganancia").prop("disabled", true);
-
-	let detalles = frmDetallesVisible() ? obtenerDetalles() : { talla: '', color: '', idmedida: '0', peso: '0.00' };
+	let detalles = frmDetallesVisible() ? obtenerDetalles() : { talla: '', color: '' };
 
 	for (let key in detalles) {
 		formData.append(key, detalles[key]);
 	}
-
-	$("#idlocal").attr("onchange", "actualizarRUC();");
 
 	$.ajax({
 		url: "../ajax/articulo.php?op=guardaryeditar",
@@ -449,7 +281,7 @@ function guardaryeditar(e) {
 
 		success: function (datos) {
 			datos = limpiarCadena(datos);
-			if (datos == "El código de barra del producto que ha ingresado ya existe." || datos == "El código del producto que ha ingresado ya existe en el local seleccionado.") {
+			if (datos == "El código del producto que ha ingresado ya existe.") {
 				bootbox.alert(datos);
 				$("#btnGuardar").prop("disabled", false);
 				return;
@@ -466,14 +298,10 @@ function obtenerDetalles() {
 	let detalles = {
 		talla: $("#talla").val(),
 		color: $("#color").val(),
-		idmedida: $("#idmedida").val(),
-		peso: $("#peso").val()
 	};
 
 	if (!detalles.talla) detalles.talla = '';
 	if (!detalles.color) detalles.color = '';
-	if (!detalles.idmedida) detalles.idmedida = '0';
-	if (!detalles.peso) detalles.peso = '0.00';
 
 	return detalles;
 }
@@ -484,13 +312,11 @@ function frmDetallesVisible() {
 
 function mostrar(idarticulo) {
 	mostrarform(true);
+	frmDetalles(true);
 
 	$(".caja1").show();
 	$(".caja2").removeClass("col-lg-12 col-md-12 col-sm-12").addClass("col-lg-10 col-md-8 col-sm-12");
 	$(".botones").removeClass("col-lg-12 col-md-12 col-sm-12").addClass("col-lg-10 col-md-8 col-sm-12");
-
-	$(".btn1").show();
-	$(".btn2").hide();
 
 	$.post("../ajax/articulo.php?op=mostrar", { idarticulo: idarticulo }, function (data, status) {
 		data = JSON.parse(data);
@@ -498,13 +324,7 @@ function mostrar(idarticulo) {
 
 		$("#idcategoria").val(data.idcategoria);
 		$('#idcategoria').selectpicker('refresh');
-		$("#idlocal").val(data.idlocal);
-		$('#idlocal').selectpicker('refresh');
-		$("#idmarca").val(data.idmarca);
-		$('#idmarca').selectpicker('refresh');
-		$("#idmedida").val(data.idmedida);
-		$('#idmedida').selectpicker('refresh');
-		$("#codigo_barra").val(data.codigo);
+		// $("#codigo_barra").val(data.codigo);
 
 		const partes = data.codigo_producto.match(/([a-zA-Z]+)(\d+)/) || ["", "", ""];
 
@@ -520,55 +340,12 @@ function mostrar(idarticulo) {
 		$("#descripcion").val(data.descripcion);
 		$("#talla").val(data.talla);
 		$("#color").val(data.color);
-		$("#peso").val(data.peso);
 		$("#imagenmuestra").show();
 		$("#imagenmuestra").attr("src", "../files/articulos/" + data.imagen);
-		$("#precio_compra").val(data.precio_compra);
 		$("#precio_venta").val(data.precio_venta);
-		$("#ganancia").val(data.ganancia);
-		$("#comision").val(data.comision);
 		$("#imagenactual").val(data.imagen);
 		$("#idarticulo").val(data.idarticulo);
-		generarbarcode(0);
-		actualizarRUC();
-
-		$("#idlocal").attr("onchange", "actualizarRUC(); actualizarCorrelativo(this);");
 	})
-}
-
-function limpiarModalComision() {
-	$("#comision2").val("");
-	$("#btnGuardarComision").prop("disabled", false);
-}
-
-function verificarModalComision() {
-	bootbox.confirm("¿Está seguro de modificar la comisión de todos los productos?", function (result) {
-		if (result) {
-			$("#formulario2").submit();
-		}
-	})
-}
-
-function guardaryeditar2(e) {
-	e.preventDefault(); //No se activará la acción predeterminada del evento
-	$("#btnGuardarComision").prop("disabled", true);
-	var formData = new FormData($("#formulario2")[0]);
-
-	$.ajax({
-		url: "../ajax/articulo.php?op=guardarComision",
-		type: "POST",
-		data: formData,
-		contentType: false,
-		processData: false,
-
-		success: function (datos) {
-			datos = limpiarCadena(datos);
-			limpiarModalComision();
-			bootbox.alert(datos);
-			$('#myModal').modal('hide');
-			tabla.ajax.reload();
-		}
-	});
 }
 
 //Función para desactivar registros
@@ -607,13 +384,8 @@ function eliminar(idarticulo) {
 	})
 }
 
-function convertirMayus() {
-	var inputCodigo = document.getElementById("codigo_producto");
-	inputCodigo.value = inputCodigo.value.toUpperCase();
-}
-
 function resetear() {
-	const selects = ["idmarcaBuscar", "idcategoriaBuscar", "estadoBuscar", "fecha_inicio", "fecha_fin"];
+	const selects = ["idcategoriaBuscar", "estadoBuscar"];
 
 	for (const selectId of selects) {
 		$("#" + selectId).val("");
@@ -625,21 +397,18 @@ function resetear() {
 
 //Función buscar
 function buscar() {
-	let param1 = "";
 	let param2 = "";
 	let param3 = "";
 
 	// Obtener los selectores
-	const selectMarca = document.getElementById("idmarcaBuscar");
 	const selectCategoria = document.getElementById("idcategoriaBuscar");
 	const selectEstado = document.getElementById("estadoBuscar");
 
-	if (selectMarca.value == "" && selectCategoria.value == "" && selectEstado.value == "") {
+	if (selectCategoria.value == "" && selectEstado.value == "") {
 		bootbox.alert("Debe seleccionar al menos un campo para realizar la búsqueda.");
 		return;
 	}
 
-	param1 = selectMarca.value;
 	param2 = selectCategoria.value;
 	param3 = selectEstado.value;
 
@@ -670,7 +439,7 @@ function buscar() {
 			"ajax":
 			{
 				url: '../ajax/articulo.php?op=listar',
-				data: { param1: param1, param2: param2, param3: param3 },
+				data: { param2: param2, param3: param3 },
 				type: "get",
 				dataType: "json",
 				error: function (e) {
@@ -696,145 +465,9 @@ function buscar() {
 		}).DataTable();
 }
 
-var quaggaIniciado = false;
-
-function escanear() {
-
-	// Intentar acceder a la cámara
-	navigator.mediaDevices.getUserMedia({ video: true })
-		.then(function (stream) {
-			$(".btn1").hide();
-			$(".btn2").show();
-
-			// Acceso a la cámara exitoso, inicializa Quagga
-			Quagga.init({
-				inputStream: {
-					name: "Live",
-					type: "LiveStream",
-					target: document.querySelector('#camera')
-				},
-				decoder: {
-					readers: ["code_128_reader"]
-				}
-			}, function (err) {
-				if (err) {
-					console.log(err);
-					return;
-				}
-				console.log("Initialization finished. Ready to start");
-				Quagga.start();
-				quaggaIniciado = true;
-			});
-
-			$("#camera").show();
-
-			Quagga.onDetected(function (data) {
-				console.log(data.codeResult.code);
-				var codigoBarra = data.codeResult.code;
-				document.getElementById('codigo').value = codigoBarra;
-			});
-		})
-		.catch(function (error) {
-			bootbox.alert("No se encontró una cámara conectada.");
-		});
-}
-
-function detenerEscaneo() {
-	if (quaggaIniciado) {
-		Quagga.stop();
-		$(".btn1").show();
-		$(".btn2").hide();
-		$("#camera").hide();
-		formatearNumero();
-		quaggaIniciado = false;
-	}
-}
-
-$("#codigo_barra").on("input", function () {
-	formatearNumero();
-});
-
-function formatearNumero() {
-	var codigo = $("#codigo_barra").val().replace(/\s/g, '').replace(/\D/g, '');
-	var formattedCode = '';
-
-	for (var i = 0; i < codigo.length; i++) {
-		if (i === 1 || i === 3 || i === 7 || i === 8 || i === 12 || i === 13) {
-			formattedCode += ' ';
-		}
-
-		formattedCode += codigo[i];
-	}
-
-	var maxLength = parseInt($("#codigo_barra").attr("maxlength"));
-	if (formattedCode.length > maxLength) {
-		formattedCode = formattedCode.substring(0, maxLength);
-	}
-
-	$("#codigo_barra").val(formattedCode);
-	generarbarcode(0);
-}
-
-function borrar() {
-	$("#codigo_barra").val("");
-	$("#codigo_barra").focus();
-	$("#print").hide();
-}
-
-//función para generar el número aleatorio del código de barra
-function generar() {
-	var codigo = "7 75 ";
-	codigo += generarNumero(10000, 999) + " ";
-	codigo += Math.floor(Math.random() * 10) + " ";
-	codigo += generarNumero(100, 9) + " ";
-	codigo += Math.floor(Math.random() * 10);
-	$("#codigo_barra").val(codigo);
-	generarbarcode(1);
-}
-
-function generarNumero(max, min) {
-	var numero = Math.floor(Math.random() * (max - min + 1)) + min;
-	var numeroFormateado = ("0000" + numero).slice(-4);
-	return numeroFormateado;
-}
-
-// Función para generar el código de barras
-function generarbarcode(param) {
-
-	if (param == 1) {
-		var codigo = $("#codigo_barra").val().replace(/\s/g, '');
-		console.log(codigo.length);
-
-		if (!/^\d+$/.test(codigo)) {
-			bootbox.alert("El código de barra debe contener solo números.");
-			return;
-		} else if (codigo.length !== 13) {
-			bootbox.alert("El código de barra debe tener 13 dígitos.");
-			return;
-		} else {
-			codigo = codigo.slice(0, 1) + " " + codigo.slice(1, 3) + " " + codigo.slice(3, 7) + " " + codigo.slice(7, 8) + " " + codigo.slice(8, 12) + " " + codigo.slice(12, 13);
-		}
-	} else {
-		var codigo = $("#codigo_barra").val()
-	}
-
-	if (codigo != "") {
-		JsBarcode("#barcode", codigo);
-		$("#codigo_barra").val(codigo);
-		$("#print").show();
-	} else {
-		$("#print").hide();
-	}
-}
-
 function convertirMayus() {
 	var inputCodigo = document.getElementById("cod_part_1");
 	inputCodigo.value = inputCodigo.value.toUpperCase();
-}
-
-//Función para imprimir el código de barras
-function imprimir() {
-	$("#print").printArea();
 }
 
 init();

@@ -64,7 +64,7 @@ switch ($_GET["op"]) {
 					} else if ($usuarioExiste) {
 						echo "El nombre del usuario que ha ingresado ya existe.";
 					} else {
-						$rspta = $usuario->insertar($$nombre, $tipo_documento, $num_documento, $direccion, $telefono, $email, $cargo, $login, $clave, $imagen, $_POST['permiso']);
+						$rspta = $usuario->insertar($nombre, $tipo_documento, $num_documento, $direccion, $telefono, $email, $cargo, $login, $clave, $imagen, $_POST['permiso']);
 						echo $rspta ? "Usuario registrado" : "Usuario no se pudo registrar.";
 					}
 				} else {
@@ -72,7 +72,7 @@ switch ($_GET["op"]) {
 					if ($usuarioExiste) {
 						echo "El nombre del usuario que ha ingresado ya existe.";
 					} else {
-						$rspta = $usuario->editar($idusuario, $$nombre, $tipo_documento, $num_documento, $direccion, $telefono, $email, $cargo, $login, $clave, $imagen, $_POST['permiso']);
+						$rspta = $usuario->editar($idusuario, $nombre, $tipo_documento, $num_documento, $direccion, $telefono, $email, $cargo, $login, $clave, $imagen, $_POST['permiso']);
 						echo $rspta ? "Usuario actualizado" : "Usuario no se pudo actualizar";
 					}
 				}
@@ -154,13 +154,12 @@ switch ($_GET["op"]) {
 
 					$data[] = array(
 						"0" => '<div style="display: flex; flex-wrap: nowrap; gap: 3px">' .
-							(!(($reg->cargo == "superadmin" && $_SESSION['cargo'] == 'admin') || ($reg->cargo == "admin_total" && $_SESSION['cargo'] == 'admin') || ($reg->cargo == "superadmin" && $_SESSION['cargo'] == 'admin_total')) ?
-								((($reg->estado) ?
-									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px;" onclick="mostrar(' . $reg->idusuario . ');"><i class="fa fa-pencil"></i></button>') : '') .
-									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="margin-right: 3px; height: 35px;" onclick="desactivar(' . $reg->idusuario . ')"><i class="fa fa-close"></i></button>') : '') .
-									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '') : (($_SESSION['cargo'] == 'superadmin' || $_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px; height: 35px;" onclick="mostrar(' . $reg->idusuario . ');"><i class="fa fa-pencil"></i></button>') : '') .
-									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-success" style="margin-right: 3px; width: 35px; height: 35px; padding: 0;" onclick="activar(' . $reg->idusuario . ')"><i style="margin-left: -2px" class="fa fa-check"></i></button>') : '') .
-									(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '')) . '</div>') : ("")),
+							(($reg->estado) ?
+								(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px;" onclick="mostrar(' . $reg->idusuario . ');"><i class="fa fa-pencil"></i></button>') : '') .
+								(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="margin-right: 3px; height: 35px;" onclick="desactivar(' . $reg->idusuario . ')"><i class="fa fa-close"></i></button>') : '') .
+								(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '') : (($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-warning" style="margin-right: 3px; height: 35px;" onclick="mostrar(' . $reg->idusuario . ');"><i class="fa fa-pencil"></i></button>') : '') .
+								(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-success" style="margin-right: 3px; width: 35px; height: 35px; padding: 0;" onclick="activar(' . $reg->idusuario . ')"><i style="margin-left: -2px" class="fa fa-check"></i></button>') : '') .
+								(($_SESSION['cargo'] == 'admin') ? ('<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idusuario . ')"><i class="fa fa-trash"></i></button>') : '')) . '</div>',
 						"1" => $reg->nombre,
 						"2" => $reg->login,
 						"3" => $cargo_detalle,
@@ -193,9 +192,10 @@ switch ($_GET["op"]) {
 
 		while ($reg = $rspta->fetch_object()) {
 			$cargo_detalle = "";
+
 			switch ($reg->cargo) {
-				case 'superadmin':
-					$cargo_detalle = "Superadministrador";
+				case 'admin':
+					$cargo_detalle = "Administrador";
 					break;
 				case 'vendedor':
 					$cargo_detalle = "Vendedor";
@@ -221,9 +221,10 @@ switch ($_GET["op"]) {
 		echo '<option value="">- Seleccione -</option>';
 		while ($reg = $rspta->fetch_object()) {
 			$cargo_detalle = "";
+
 			switch ($reg->cargo) {
-				case 'superadmin':
-					$cargo_detalle = "Superadministrador";
+				case 'admin':
+					$cargo_detalle = "Administrador";
 					break;
 				case 'vendedor':
 					$cargo_detalle = "Vendedor";
@@ -293,8 +294,8 @@ switch ($_GET["op"]) {
 			$_SESSION['cargo'] = $fetch->cargo;
 
 			switch ($_SESSION['cargo']) {
-				case 'superadmin':
-					$_SESSION['cargo_detalle'] = "Superadministrador";
+				case 'admin':
+					$_SESSION['cargo_detalle'] = "Administrador";
 					break;
 				case 'vendedor':
 					$_SESSION['cargo_detalle'] = "Vendedor";

@@ -11,26 +11,6 @@ function init() {
 
 	$('#mVentas').addClass("treeview active");
 	$('#lClientes').addClass("active");
-
-	$.post('../ajax/locales.php?op=selectLocalesUsuario', function (r) {
-		console.log(r);
-		$('#idlocal').html(r);
-		$('#idlocal').selectpicker('refresh');
-		actualizarRUC();
-	});
-}
-
-function actualizarRUC() {
-	const selectLocal = document.getElementById("idlocal");
-	const localRUCInput = document.getElementById("local_ruc");
-	const selectedOption = selectLocal.options[selectLocal.selectedIndex];
-
-	if (selectedOption.value !== "") {
-		const localRUC = selectedOption.getAttribute('data-local-ruc');
-		localRUCInput.value = localRUC;
-	} else {
-		localRUCInput.value = "";
-	}
 }
 
 function limpiar() {
@@ -42,11 +22,6 @@ function limpiar() {
 	$("#descripcion").val("");
 	$("#telefono").val("");
 	$("#email").val("");
-
-	$("#idlocal").val($("#idlocal option:first").val());
-	$("#idlocal").selectpicker('refresh');
-
-	actualizarRUC();
 }
 
 function mostrarform(flag) {
@@ -162,8 +137,6 @@ function mostrar(idcliente) {
 		console.log(data);
 
 		$("#nombre").val(data.nombre);
-		$("#idlocal").val(data.idlocal);
-		$('#idlocal').selectpicker('refresh');
 		$("#tipo_documento").val(data.tipo_documento);
 		$("#num_documento").val(data.num_documento);
 		$("#direccion").val(data.direccion);
@@ -171,8 +144,6 @@ function mostrar(idcliente) {
 		$("#telefono").val(data.telefono);
 		$("#email").val(data.email);
 		$("#idcliente").val(data.idcliente);
-
-		actualizarRUC();
 	})
 }
 
@@ -209,7 +180,7 @@ function eliminar(idcliente) {
 	})
 }
 
-function verificarModalCliente(idcliente, nombre, tipo_documento, num_documento, local) {
+function verificarModalCliente(idcliente, nombre, tipo_documento, num_documento) {
 	var $btnVentas = $('#myModal .btn-ventas');
 	var $btnProformas = $('#myModal .btn-proformas');
 
@@ -217,13 +188,11 @@ function verificarModalCliente(idcliente, nombre, tipo_documento, num_documento,
 	$btnVentas.data('nombre', nombre);
 	$btnVentas.data('tipo-documento', tipo_documento);
 	$btnVentas.data('num-documento', num_documento);
-	$btnVentas.data('local', local);
 
 	$btnProformas.data('idcliente', idcliente);
 	$btnProformas.data('nombre', nombre);
 	$btnProformas.data('tipo-documento', tipo_documento);
 	$btnProformas.data('num-documento', num_documento);
-	$btnProformas.data('local', local);
 
 	$('#myModal').modal('show');
 }
@@ -233,8 +202,7 @@ $('#myModal .btn-ventas').on('click', function () {
 	var nombre = $(this).data('nombre');
 	var tipo_documento = $(this).data('tipo-documento');
 	var num_documento = $(this).data('num-documento');
-	var local = $(this).data('local');
-	modalVentasCliente(idcliente, nombre, tipo_documento, num_documento, local);
+	modalVentasCliente(idcliente, nombre, tipo_documento, num_documento);
 });
 
 // Asignar evento de clic al botón "VER DE PROFORMAS"
@@ -243,12 +211,11 @@ $('#myModal .btn-proformas').on('click', function () {
 	var nombre = $(this).data('nombre');
 	var tipo_documento = $(this).data('tipo-documento');
 	var num_documento = $(this).data('num-documento');
-	var local = $(this).data('local');
-	modalProformasCliente(idcliente, nombre, tipo_documento, num_documento, local);
+	modalProformasCliente(idcliente, nombre, tipo_documento, num_documento);
 });
 
-function modalVentasCliente(idcliente, nombre, tipo_documento, num_documento, local) {
-	$(".cliente_detalles").text(capitalizarTodasLasPalabras(`${nombre} - ${tipo_documento}: ${num_documento} - ${local}`));
+function modalVentasCliente(idcliente, nombre, tipo_documento, num_documento) {
+	$(".cliente_detalles").text(capitalizarTodasLasPalabras(`${nombre} - ${tipo_documento}: ${num_documento}`));
 
 	tabla2 = $('#tbldetalles').dataTable(
 		{
@@ -410,8 +377,8 @@ function limpiarModalImpresion() {
 	});
 }
 
-function modalProformasCliente(idcliente, nombre, tipo_documento, num_documento, local) {
-	$(".cliente_detalles").text(capitalizarTodasLasPalabras(`${nombre} - ${tipo_documento}: ${num_documento} - ${local}`));
+function modalProformasCliente(idcliente, nombre, tipo_documento, num_documento) {
+	$(".cliente_detalles").text(capitalizarTodasLasPalabras(`${nombre} - ${tipo_documento}: ${num_documento}`));
 
 	tabla2 = $('#tbldetalles2').dataTable(
 		{

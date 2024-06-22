@@ -17,9 +17,11 @@ if (!isset($_SESSION["nombre"])) {
             <div class="box">
               <div class="box-header with-border">
                 <h1 class="box-title">Categorías
-                  <button class="btn btn-bcp" id="btnagregar" onclick="mostrarform(true)">
-                    <i class="fa fa-plus-circle"></i> Agregar
-                  </button>
+                  <?php if ($_SESSION["cargo"] == "admin" || $_SESSION["cargo"] == "vendedor") { ?>
+                    <button class="btn btn-bcp" id="btnagregar" onclick="mostrarform(true)">
+                      <i class="fa fa-plus-circle"></i> Agregar
+                    </button>
+                  <?php } ?>
                   <?php if ($_SESSION["cargo"] == "admin") { ?>
                     <a href="../reportes/rptcategorias.php" target="_blank">
                       <button class="btn btn-secondary" style="color: black !important;">
@@ -27,7 +29,7 @@ if (!isset($_SESSION["nombre"])) {
                       </button>
                     </a>
                   <?php } ?>
-                  <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Categorías</strong>" data-html="true" data-content="Módulo para registrar las categorías de los productos.<br><br><strong>Nota:</strong> Las categorías no están divididos por local, de la cual, las categorías que registre serán visibles y utilizados por los trabajadores <strong>de todos los locales</strong> (solo puede editar, anular y eliminar las categorías que ustéd agrega y no el de los demás)." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
+                  <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Categorías</strong>" data-html="true" data-content="Módulo para registrar las categorías de los productos." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
                 </h1>
                 <div class="box-tools pull-right">
                 </div>

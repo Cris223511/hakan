@@ -36,6 +36,10 @@ if (!isset($_SESSION["nombre"])) {
         .botones {
           width: 100% !important;
         }
+
+        .table-responsive {
+          margin: 0;
+        }
       }
 
       tbody td:nth-child(12) {
@@ -97,14 +101,14 @@ if (!isset($_SESSION["nombre"])) {
             <div class="box">
               <div class="box-header with-border">
                 <h1 class="box-title">Reporte de métodos de pago de cotizaciones</h1>
-                <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Reporte de métodos de pago</strong>" data-html="true" data-content="Módulo para ver el monto de los métodos de pago de las cotizaciones que se hicieron en <strong>su local</strong>." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
+                <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Reporte de métodos de pago.</strong>" data-html="true" data-content="Módulo para ver el monto de los métodos de pago de las cotizaciones que se hicieron." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
                 <div class="box-tools pull-right"></div>
                 <div class="panel-body table-responsive listadoregistros" style="overflow: visible; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;">
-                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>Fecha Inicial:</label>
                     <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio">
                   </div>
-                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>Fecha Final:</label>
                     <input type="date" class="form-control" name="fecha_fin" id="fecha_fin">
                   </div>
@@ -120,8 +124,6 @@ if (!isset($_SESSION["nombre"])) {
                       <button style="height: 32px;" class="btn btn-success" onclick="resetear()"><i class="fa fa-repeat"></i></button>
                     </div>
                   </div>
-                  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="contenedorPagos" style="padding: 5px; margin: 0px;">
-                  </div>
                 </div>
               </div>
               <div class="panel-body listadoregistros" style="background-color: #ecf0f5 !important; padding-left: 0 !important; padding-right: 0 !important; height: max-content;">
@@ -134,8 +136,6 @@ if (!isset($_SESSION["nombre"])) {
                       <th>Método de pago</th>
                       <th>Monto</th>
                       <th>Número Ticket</th>
-                      <th style="width: 15%; min-width: 200px;">Almacén</th>
-                      <th>Caja</th>
                       <th>Documento</th>
                       <th>Agregado por</th>
                       <th>Estado</th>
@@ -149,8 +149,6 @@ if (!isset($_SESSION["nombre"])) {
                       <th>Método de pago</th>
                       <th>Monto</th>
                       <th>Número Ticket</th>
-                      <th>Almacén</th>
-                      <th>Caja</th>
                       <th>Documento</th>
                       <th>Agregado por</th>
                       <th>Estado</th>

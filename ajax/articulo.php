@@ -17,15 +17,10 @@ $articulo = new Articulo();
 
 // Variables de sesión a utilizar.
 $idusuario = $_SESSION["idusuario"];
-$idlocalSession = $_SESSION["idlocal"];
 $cargo = $_SESSION["cargo"];
 
 $idarticulo = isset($_POST["idarticulo"]) ? limpiarCadena($_POST["idarticulo"]) : "";
 $idcategoria = isset($_POST["idcategoria"]) ? limpiarCadena($_POST["idcategoria"]) : "";
-$idlocal = isset($_POST["idlocal"]) ? limpiarCadena($_POST["idlocal"]) : "";
-$idmarca = isset($_POST["idmarca"]) ? limpiarCadena($_POST["idmarca"]) : "";
-$idmedida = isset($_POST["idmedida"]) ? limpiarCadena($_POST["idmedida"]) : "";
-$codigo = isset($_POST["codigo"]) ? limpiarCadena($_POST["codigo"]) : "";
 $codigo_producto = isset($_POST["codigo_producto"]) ? limpiarCadena($_POST["codigo_producto"]) : "";
 $nombre = isset($_POST["nombre"]) ? limpiarCadena($_POST["nombre"]) : "";
 $stock = isset($_POST["stock"]) ? limpiarCadena($_POST["stock"]) : "";
@@ -33,13 +28,8 @@ $stock_minimo = isset($_POST["stock_minimo"]) ? limpiarCadena($_POST["stock_mini
 $descripcion = isset($_POST["descripcion"]) ? limpiarCadena($_POST["descripcion"]) : "";
 $talla = isset($_POST["talla"]) ? limpiarCadena($_POST["talla"]) : "";
 $color = isset($_POST["color"]) ? limpiarCadena($_POST["color"]) : "";
-$peso = isset($_POST["peso"]) ? limpiarCadena($_POST["peso"]) : "";
 $imagen = isset($_POST["imagen"]) ? limpiarCadena($_POST["imagen"]) : "";
-$precio_compra = isset($_POST["precio_compra"]) ? limpiarCadena($_POST["precio_compra"]) : "";
 $precio_venta = isset($_POST["precio_venta"]) ? limpiarCadena($_POST["precio_venta"]) : "";
-$ganancia = isset($_POST["ganancia"]) ? limpiarCadena($_POST["ganancia"]) : "";
-$comision = isset($_POST["comision"]) ? limpiarCadena($_POST["comision"]) : "";
-$barra = isset($_POST["barra"]) ? limpiarCadena($_POST["barra"]) : "";
 
 switch ($_GET["op"]) {
 	case 'guardaryeditar':
@@ -68,22 +58,19 @@ switch ($_GET["op"]) {
 		}
 
 		if (empty($idarticulo)) {
-			$codigoExiste = $articulo->verificarCodigoExiste($codigo);
-			$codigoProductoExiste = $articulo->verificarCodigoProductoExiste($codigo_producto, $idlocal);
+			$codigoProductoExiste = $articulo->verificarCodigoProductoExiste($codigo_producto);
 			if ($codigoProductoExiste) {
-				echo "El código del producto que ha ingresado ya existe en el local seleccionado.";
-			} else if ($codigoExiste && $codigo != "") {
-				echo "El código de barra del producto que ha ingresado ya existe.";
+				echo "El código del producto que ha ingresado ya existe.";
 			} else {
-				$rspta = $articulo->insertar($idusuario, $idcategoria, $idlocal, $idmarca, $idmedida, $codigo, $codigo_producto, $nombre, $stock, $stock_minimo, $descripcion, $talla, $color, $peso, $imagen, $precio_compra, $precio_venta, $ganancia,  $comision);
+				$rspta = $articulo->insertar($idusuario, $idcategoria, $codigo_producto, $nombre, $stock, $stock_minimo, $descripcion, $talla, $color, $imagen, $precio_venta);
 				echo $rspta ? "Producto registrado" : "El producto no se pudo registrar";
 			}
 		} else {
-			$nombreExiste = $articulo->verificarCodigoProductoEditarExiste($codigo_producto, $idlocal, $idarticulo);
+			$nombreExiste = $articulo->verificarCodigoProductoEditarExiste($codigo_producto, $idarticulo);
 			if ($nombreExiste) {
-				echo "El código del producto que ha ingresado ya existe en el local seleccionado.";
+				echo "El código del producto que ha ingresado ya existe.";
 			} else {
-				$rspta = $articulo->editar($idarticulo, $idcategoria, $idlocal, $idmarca, $idmedida, $codigo, $codigo_producto, $nombre, $stock, $stock_minimo, $descripcion, $talla, $color, $peso, $imagen, $precio_compra, $precio_venta, $ganancia,  $comision);
+				$rspta = $articulo->editar($idarticulo, $idcategoria, $codigo_producto, $nombre, $stock, $stock_minimo, $descripcion, $talla, $color, $imagen, $precio_venta);
 				echo $rspta ? "Producto actualizado" : "El producto no se pudo actualizar";
 			}
 		}
@@ -116,69 +103,42 @@ switch ($_GET["op"]) {
 		break;
 
 	case 'listar':
-		$param1 = $_GET["param1"]; // valor marca
 		$param2 = $_GET["param2"]; // valor categoria
 		$param3 = $_GET["param3"]; // valor estado
 
-		if ($param1 != '' && $param2 == '' && $param3 == '') {
-			$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idmarca = '$param1'");
-		} else if ($param1 == '' && $param2 != '' && $param3 == '') {
-			$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idcategoria = '$param2'");
-		} else if ($param1 == '' && $param2 == '' && $param3 != '') {
+		if ($param2 != '' && $param3 == '') {
+			$rspta = $articulo->listarPorUsuarioParametro("a.idcategoria = '$param2'");
+		} else if ($param2 == '' && $param3 != '') {
 			if ($param3 == "1") {
 				// Disponible
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.stock > a.stock_minimo");
+				$rspta = $articulo->listarPorUsuarioParametro("a.stock > a.stock_minimo");
 			} else if ($param3 == "2") {
 				// Agotándose
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.stock > 0 AND a.stock < a.stock_minimo");
+				$rspta = $articulo->listarPorUsuarioParametro("a.stock > 0 AND a.stock < a.stock_minimo");
 			} else {
 				// Agotado
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.stock = 0");
+				$rspta = $articulo->listarPorUsuarioParametro("a.stock = 0");
 			}
-		} else if ($param1 != '' && $param2 != '' && $param3 == '') {
-			$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idmarca = '$param1' AND a.idcategoria = '$param2'");
-		} else if ($param1 != '' && $param2 == '' && $param3 != '') {
+		} else if ($param2 != '' && $param3 != '') {
 			if ($param3 == "1") {
 				// Disponible
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idmarca = '$param1' AND a.stock > a.stock_minimo");
+				$rspta = $articulo->listarPorUsuarioParametro("a.idcategoria = '$param2' AND a.stock > a.stock_minimo");
 			} else if ($param3 == "2") {
 				// Agotándose
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idmarca = '$param1' AND a.stock > 0 AND a.stock < a.stock_minimo");
+				$rspta = $articulo->listarPorUsuarioParametro("a.idcategoria = '$param2' AND a.stock > 0 AND a.stock < a.stock_minimo");
 			} else {
 				// Agotado
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idmarca = '$param1' AND a.stock = 0");
-			}
-		} else if ($param1 == '' && $param2 != '' && $param3 != '') {
-			if ($param3 == "1") {
-				// Disponible
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idcategoria = '$param2' AND a.stock > a.stock_minimo");
-			} else if ($param3 == "2") {
-				// Agotándose
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idcategoria = '$param2' AND a.stock > 0 AND a.stock < a.stock_minimo");
-			} else {
-				// Agotado
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idcategoria = '$param2' AND a.stock = 0");
-			}
-		} else if ($param1 != '' && $param2 != '' && $param3 != '') {
-			if ($param3 == "1") {
-				// Disponible
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idmarca = '$param1' AND a.idcategoria = '$param2' AND a.stock > a.stock_minimo");
-			} else if ($param3 == "2") {
-				// Agotándose
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idmarca = '$param1' AND a.idcategoria = '$param2' AND a.stock > 0 AND a.stock < a.stock_minimo");
-			} else {
-				// Agotado
-				$rspta = $articulo->listarPorUsuarioParametro($idlocalSession, "a.idmarca = '$param1' AND a.idcategoria = '$param2' AND a.stock = 0");
+				$rspta = $articulo->listarPorUsuarioParametro("a.idcategoria = '$param2' AND a.stock = 0");
 			}
 		} else {
-			$rspta = $articulo->listarPorUsuario($idlocalSession);
+			$rspta = $articulo->listarPorUsuario();
 		}
 
 		$data = array();
 
 		function mostrarBoton($reg, $cargo, $idusuario, $buttonType)
 		{
-			if ($cargo == "superadmin" || ($cargo == "vendedor" && $idusuario == $_SESSION["idusuario"])) {
+			if ($cargo == "admin" || ($cargo == "vendedor" && $idusuario == $_SESSION["idusuario"])) {
 				return $buttonType;
 			} else {
 				return '';
@@ -189,17 +149,14 @@ switch ($_GET["op"]) {
 			$cargo_detalle = "";
 
 			switch ($reg->cargo) {
-				case 'superadmin':
-					$cargo_detalle = "Superadministrador";
-					break;
-				case 'admin_total':
-					$cargo_detalle = "Admin Total";
-					break;
 				case 'admin':
 					$cargo_detalle = "Administrador";
 					break;
-				case 'cajero':
-					$cargo_detalle = "Cajero";
+				case 'vendedor':
+					$cargo_detalle = "Vendedor";
+					break;
+				case 'cliente':
+					$cargo_detalle = "Cliente";
 					break;
 				default:
 					break;
@@ -215,19 +172,13 @@ switch ($_GET["op"]) {
 								</a>',
 				"2" => $reg->nombre,
 				"3" => $reg->categoria,
-				"4" => $reg->local,
-				"5" => $reg->marca,
-				"6" => $reg->codigo_producto,
-				"7" => $reg->codigo,
-				"8" => ($reg->stock > 0 && $reg->stock < $reg->stock_minimo) ? '<span style="color: #Ea9900; font-weight: bold">' . $reg->stock . '</span>' : (($reg->stock != '0') ? '<span>' . $reg->stock . '</span>' : '<span style="color: red; font-weight: bold">' . $reg->stock . '</span>'),
-				"9" => $reg->stock_minimo,
-				"10" => "S/. " . number_format($reg->precio_compra, 2, '.', ','),
-				"11" => "S/. " . number_format($reg->precio_venta, 2, '.', ','),
-				"12" => "S/. " . number_format($reg->ganancia, 2, '.', ','),
-				"13" => "S/. " . number_format($reg->comision, 2, '.', ','),
-				"14" => $reg->usuario,
-				"15" => $cargo_detalle,
-				"16" => ($reg->stock > 0 && $reg->stock < $reg->stock_minimo) ? '<span class="label bg-orange">agotandose</span>' : (($reg->stock != '0') ? '<span class="label bg-green">Disponible</span>' : '<span class="label bg-red">agotado</span>')
+				"4" => $reg->codigo_producto,
+				"5" => ($reg->stock > 0 && $reg->stock < $reg->stock_minimo) ? '<span style="color: #Ea9900; font-weight: bold">' . $reg->stock . '</span>' : (($reg->stock != '0') ? '<span>' . $reg->stock . '</span>' : '<span style="color: red; font-weight: bold">' . $reg->stock . '</span>'),
+				"6" => $reg->stock_minimo,
+				"7" => "S/. " . number_format($reg->precio_venta, 2, '.', ','),
+				"8" => $reg->usuario,
+				"9" => $cargo_detalle,
+				"10" => ($reg->stock > 0 && $reg->stock < $reg->stock_minimo) ? '<span class="label bg-orange">agotandose</span>' : (($reg->stock != '0') ? '<span class="label bg-green">Disponible</span>' : '<span class="label bg-red">agotado</span>')
 			);
 		}
 		$results = array(
@@ -241,17 +192,17 @@ switch ($_GET["op"]) {
 		break;
 
 	case 'getLastCodigo':
-		if ($_POST["idlocal"] == 0 || $_POST["idlocal"] == "") {
-			$result = $articulo->getLastCodigo($idlocalSession);
-		} else {
-			$result = $articulo->getLastCodigo($idlocal);
-		}
+		$result = $articulo->getLastCodigo();
 
-		if (mysqli_num_rows($result) > 0) {
+		if ($result && mysqli_num_rows($result) > 0) {
 			$row = mysqli_fetch_assoc($result);
-			$last_codigo = $row["last_codigo"];
+			if ($row && !empty($row["last_codigo"])) {
+				$last_codigo = $row["last_codigo"];
+			} else {
+				$last_codigo = 'PRO0000';
+			}
 		} else {
-			$last_codigo = 'PRO0001';
+			$last_codigo = 'PRO0000';
 		}
 		echo $last_codigo;
 		break;
@@ -259,11 +210,7 @@ switch ($_GET["op"]) {
 		/* ======================= SELECTS ======================= */
 
 	case 'listarTodosActivos':
-		if ($cargo == "superadmin" || $cargo == "admin_total") {
-			$rspta = $articulo->listarTodosActivos();
-		} else {
-			$rspta = $articulo->listarTodosActivosPorUsuario($idusuario, $idlocalSession);
-		}
+		$rspta = $articulo->listarTodosActivos();
 
 		$result = mysqli_fetch_all($rspta, MYSQLI_ASSOC);
 

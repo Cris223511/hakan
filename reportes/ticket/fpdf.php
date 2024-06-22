@@ -978,7 +978,7 @@ class FPDF
 	 *                              Ticket Design                                  *
 	 *******************************************************************************/
 
-	function encabezado1($y, $logo, $ext_logo, $empresa, $num_comprobante, $fecha_hora, $tipo_comprobante, $local, $local_ruc, $estado)
+	function encabezado1($y, $logo, $ext_logo, $empresa, $num_comprobante, $fecha_hora, $tipo_comprobante, $estado)
 	{
 		# N° TICKET #
 		$this->SetXY(3, $y);
@@ -999,50 +999,38 @@ class FPDF
 		$this->MultiCell(0, 5, mb_convert_encoding(mb_strtoupper("Estado: $estado"), 'ISO-8859-1', 'UTF-8'), 0, 'L', false);
 
 		# LOGO #
-		$this->Image('../files/logo_reportes/' . $logo, 25, 12, 20, 20, $ext_logo);
+		$this->Image('../files/logo_reportes/' . $logo, 14, 13, null, 12, $ext_logo);
 
-		# TIPO DE COMPROBANTE #
-		$this->SetY($y + 32);
+		# EMPRESA #
+		$this->SetY($y + 26);
 		$this->SetFont('hypermarket', '', 10);
 		$this->SetTextColor(0, 0, 0);
 		$this->MultiCell(0, 5, mb_convert_encoding(mb_strtoupper("$empresa"), 'ISO-8859-1', 'UTF-8'), 0, 'C', false);
 
 		# TIPO DE COMPROBANTE #
-		$this->SetY($y + 38);
+		$this->SetY($y + 32);
 		$this->SetFont('hypermarket', '', 10);
 		$this->SetTextColor(0, 0, 0);
 		$this->MultiCell(0, 5, mb_convert_encoding(mb_strtoupper("$tipo_comprobante"), 'ISO-8859-1', 'UTF-8'), 0, 'C', false);
-
-		# LOCAL #
-		$this->SetY($y + 44);
-		$this->SetFont('hypermarket', '', 10);
-		$this->SetTextColor(0, 0, 0);
-		$this->MultiCell(0, 5, mb_convert_encoding(mb_strtoupper("$local"), 'ISO-8859-1', 'UTF-8'), 0, 'C', false);
-
-		# RUC #
-		$this->SetY($y + 48);
-		$this->SetFont('hypermarket', '', 10);
-		$this->SetTextColor(0, 0, 0);
-		$this->MultiCell(0, 5, mb_convert_encoding(mb_strtoupper("RUC: $local_ruc"), 'ISO-8859-1', 'UTF-8'), 0, 'C', false);
 	}
 
 	function encabezado2($y, $cliente, $telefono, $tipo_documento, $num_documento)
 	{
 		# CLIENTE #
 		$this->SetXY(3, $y);
-		$this->SetFont('hypermarket', '', 10);
+		$this->SetFont('hypermarket', '', 8.5);
 		$this->SetTextColor(0, 0, 0);
 		$this->Cell(0, 5, mb_convert_encoding(mb_strtoupper("$cliente"), 'ISO-8859-1', 'UTF-8'), 0, 'L', false);
 
 		# TELEFONO #
 		$this->SetXY(3, $y + 4);
-		$this->SetFont('hypermarket', '', 10);
+		$this->SetFont('hypermarket', '', 8.5);
 		$this->SetTextColor(0, 0, 0);
 		$this->Cell(0, 5, mb_convert_encoding("TELÉFONO: " . ($telefono != "" ? $telefono : "SIN REGISTRAR"), 'ISO-8859-1', 'UTF-8'), 0, 'L', false);
 
 		# TIPO Y NÚMERO DE DOCUMENTO #
 		$this->SetXY(3, $y + 8);
-		$this->SetFont('hypermarket', '', 10);
+		$this->SetFont('hypermarket', '', 8.5);
 		$this->SetTextColor(0, 0, 0);
 		$this->MultiCell(0, 5, ($tipo_documento != "") ? mb_convert_encoding(mb_strtoupper("$tipo_documento: $num_documento"), 'ISO-8859-1', 'UTF-8') : mb_convert_encoding("TIPO Y N° DOC. SIN REGISTRAR", 'ISO-8859-1', 'UTF-8'), 0, 'L', false);
 	}
@@ -1086,7 +1074,7 @@ class FPDF
 		return $y;
 	}
 
-	function pie($y, $usuario, $comentario, $auspiciado)
+	function pie($y, $usuario, $comentario)
 	{
 		# ATENDIDO POR #
 		$this->SetY($y);
@@ -1107,14 +1095,6 @@ class FPDF
 		$this->SetFont('hypermarket', '', 10);
 		$this->SetTextColor(0, 0, 0);
 		$this->MultiCell(0, 3.5, mb_convert_encoding(mb_strtoupper("Gracias por su compra"), 'ISO-8859-1', 'UTF-8'), 0, 'C', false);
-
-		if ($auspiciado != "") {
-			# POWERED BY #
-			$this->Ln(3);
-			$this->SetFont('hypermarket', '', 9);
-			$this->SetTextColor(0, 0, 0);
-			$this->MultiCell(63, 5, "Powered by $auspiciado", 0, 'R', false);
-		}
 
 		return $y;
 	}

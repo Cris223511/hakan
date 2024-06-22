@@ -14,11 +14,9 @@ if (!isset($_SESSION["nombre"])) {
 
 		// Variables de sesión a utilizar.
 		$idusuario = $_SESSION["idusuario"];
-		$idlocal_session = $_SESSION["idlocal"];
 		$cargo = $_SESSION["cargo"];
 
 		$idcliente = isset($_POST["idcliente"]) ? limpiarCadena($_POST["idcliente"]) : "";
-		$idlocal = isset($_POST["idlocal"]) ? limpiarCadena($_POST["idlocal"]) : "";
 		$nombre = isset($_POST["nombre"]) ? limpiarCadena($_POST["nombre"]) : "";
 		$tipo_documento = isset($_POST["tipo_documento"]) ? limpiarCadena($_POST["tipo_documento"]) : "";
 		$num_documento = isset($_POST["num_documento"]) ? limpiarCadena($_POST["num_documento"]) : "";
@@ -34,7 +32,7 @@ if (!isset($_SESSION["nombre"])) {
 					if ($nombreExiste && $num_documento != '') {
 						echo "El número de documento que ha ingresado ya existe.";
 					} else {
-						$rspta = $clientes->agregar($idusuario, $idlocal, $nombre, $tipo_documento, $num_documento, $direccion, $descripcion, $telefono, $email);
+						$rspta = $clientes->agregar($idusuario, $nombre, $tipo_documento, $num_documento, $direccion, $descripcion, $telefono, $email);
 						if (is_numeric($rspta)) {
 							echo $rspta;
 						} else {
@@ -46,7 +44,7 @@ if (!isset($_SESSION["nombre"])) {
 					if ($nombreExiste && $num_documento != '') {
 						echo "El número de documento que ha ingresado ya existe.";
 					} else {
-						$rspta = $clientes->editar($idcliente, $idlocal, $nombre, $tipo_documento, $num_documento, $direccion, $descripcion, $telefono, $email);
+						$rspta = $clientes->editar($idcliente, $nombre, $tipo_documento, $num_documento, $direccion, $descripcion, $telefono, $email);
 						echo $rspta ? "Cliente actualizado correctamente" : "El cliente no se pudo actualizar";
 					}
 				}
@@ -73,21 +71,13 @@ if (!isset($_SESSION["nombre"])) {
 				break;
 
 			case 'listar':
-				if ($cargo == "superadmin" || $cargo == "admin_total") {
-					$rspta = $clientes->listarClientes();
-				} else {
-					$rspta = $clientes->listarClientesPorUsuario($idlocal_session);
-				}
+				$rspta = $clientes->listarClientes();
 
 				$data = array();
 
 				function mostrarBoton($reg, $cargo, $idusuario, $buttonType)
 				{
-					if (($reg != "superadmin" && $reg != "admin_total") && $cargo == "admin") {
-						return $buttonType;
-					} elseif ($reg != "superadmin" && $cargo == "admin_total") {
-						return $buttonType;
-					} elseif ($cargo == "superadmin" || ($cargo == "cajero" && $idusuario == $_SESSION["idusuario"])) {
+					if ($cargo == "admin" || ($cargo == "vendedor" && $idusuario == $_SESSION["idusuario"])) {
 						return $buttonType;
 					} else {
 						return '';
@@ -98,17 +88,14 @@ if (!isset($_SESSION["nombre"])) {
 					$cargo_detalle = "";
 
 					switch ($reg->cargo) {
-						case 'superadmin':
-							$cargo_detalle = "Superadministrador";
-							break;
-						case 'admin_total':
-							$cargo_detalle = "Admin Total";
-							break;
 						case 'admin':
 							$cargo_detalle = "Administrador";
 							break;
-						case 'cajero':
-							$cargo_detalle = "Cajero";
+						case 'vendedor':
+							$cargo_detalle = "Vendedor";
+							break;
+						case 'cliente':
+							$cargo_detalle = "Cliente";
 							break;
 						default:
 							break;
@@ -119,24 +106,23 @@ if (!isset($_SESSION["nombre"])) {
 
 					$data[] = array(
 						"0" => '<div style="display: flex; flex-wrap: nowrap; gap: 3px">' .
-							'<button class="btn btn-bcp" style="margin-right: 3px; width: 35px; height: 35px; color: white !important;" onclick="verificarModalCliente(' . $reg->idcliente . ', \'' . $reg->nombre . '\', \'' . $reg->tipo_documento . '\', \'' . $reg->num_documento . '\', \'' . $reg->local . '\')"><i class="fa fa-file-text"></i></button>' .
-							mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-warning" style="margin-right: 3px; height: 35px;" onclick="mostrar(' . $reg->idcliente . ')"><i class="fa fa-pencil"></i></button>') .
+							'<button class="btn btn-bcp" style="margin-right: 3px; width: 35px; height: 35px; color: white !important;" onclick="verificarModalCliente(' . $reg->idcliente . ', \'' . $reg->nombre . '\', \'' . $reg->tipo_documento . '\', \'' . $reg->num_documento . '\')"><i class="fa fa-file-text"></i></button>' .
+							(($reg->idcliente != 0) ? (mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-warning" style="margin-right: 3px; height: 35px;" onclick="mostrar(' . $reg->idcliente . ')"><i class="fa fa-pencil"></i></button>') .
 							(($reg->estado == 'activado') ?
 								(mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-danger" style="margin-right: 3px; height: 35px;" onclick="desactivar(' . $reg->idcliente . ')"><i class="fa fa-close"></i></button>')) : (mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-success" style="margin-right: 3px; width: 35px; height: 35px;" onclick="activar(' . $reg->idcliente . ')"><i style="margin-left: -2px" class="fa fa-check"></i></button>'))) .
-							mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idcliente . ')"><i class="fa fa-trash"></i></button>') .
+							mostrarBoton($reg->cargo, $cargo, $reg->idusuario, '<button class="btn btn-danger" style="height: 35px;" onclick="eliminar(' . $reg->idcliente . ')"><i class="fa fa-trash"></i></button>')) : ("")) .
 							'</div>',
 						"1" => ucwords($reg->nombre),
-						"2" => $reg->local,
-						"3" => $reg->tipo_documento,
-						"4" => $reg->num_documento,
-						"5" => ($reg->direccion == "") ? "Sin registrar" : $reg->direccion,
-						"6" => $telefono,
-						"7" => ($reg->email == "") ? "Sin registrar" : $reg->email,
-						"8" => ($reg->descripcion == "") ? "Sin registrar" : $reg->descripcion,
-						"9" => ucwords($reg->usuario),
-						"10" => ucwords($cargo_detalle),
-						"11" => $reg->fecha,
-						"12" => ($reg->estado == 'activado') ? '<span class="label bg-green">Activado</span>' :
+						"2" => $reg->tipo_documento,
+						"3" => $reg->num_documento,
+						"4" => ($reg->direccion == "") ? "Sin registrar" : $reg->direccion,
+						"5" => $telefono,
+						"6" => ($reg->email == "") ? "Sin registrar" : $reg->email,
+						"7" => ($reg->descripcion == "") ? "Sin registrar" : $reg->descripcion,
+						"8" => ucwords($reg->usuario),
+						"9" => ucwords($cargo_detalle),
+						"10" => $reg->fecha,
+						"11" => ($reg->estado == 'activado') ? '<span class="label bg-green">Activado</span>' :
 							'<span class="label bg-red">Desactivado</span>'
 					);
 				}
@@ -153,21 +139,13 @@ if (!isset($_SESSION["nombre"])) {
 			case 'listarVentasCliente':
 				$idcliente = $_GET["idcliente"];
 
-				if ($cargo == "superadmin" || $cargo == "admin_total") {
-					$rspta = $clientes->listarVentasCliente($idcliente);
-				} else {
-					$rspta = $clientes->listarVentasClienteLocal($idcliente, $idlocal_session);
-				}
+				$rspta = $clientes->listarVentasCliente($idcliente);
 
 				$data = array();
 
 				function mostrarBoton($reg, $cargo, $idusuario, $buttonType)
 				{
-					if (($reg != "superadmin" && $reg != "admin_total") && $cargo == "admin") {
-						return $buttonType;
-					} elseif ($reg != "superadmin" && $cargo == "admin_total") {
-						return $buttonType;
-					} elseif ($cargo == "superadmin" || ($cargo == "cajero" && $idusuario == $_SESSION["idusuario"])) {
+					if ($cargo == "admin" || ($cargo == "vendedor" && $idusuario == $_SESSION["idusuario"])) {
 						return $buttonType;
 					} else {
 						return '';
@@ -181,17 +159,14 @@ if (!isset($_SESSION["nombre"])) {
 					$cargo_detalle = "";
 
 					switch ($reg->cargo) {
-						case 'superadmin':
-							$cargo_detalle = "Superadministrador";
-							break;
-						case 'admin_total':
-							$cargo_detalle = "Admin Total";
-							break;
 						case 'admin':
 							$cargo_detalle = "Administrador";
 							break;
-						case 'cajero':
-							$cargo_detalle = "Cajero";
+						case 'vendedor':
+							$cargo_detalle = "Vendedor";
+							break;
+						case 'cliente':
+							$cargo_detalle = "Cliente";
 							break;
 						default:
 							break;
@@ -204,13 +179,11 @@ if (!isset($_SESSION["nombre"])) {
 							'</div>',
 						"1" => '<a target="_blank" href="../reportes/exA4Venta.php?id=' . $reg->idventa . '"> <button class="btn btn-info" style="margin-right: 3px; height: 35px; color: white !important;"><i class="fa fa-save"></i></button></a>',
 						"2" => $reg->fecha,
-						"3" => $reg->local,
-						"4" => $reg->caja,
-						"5" => $reg->tipo_comprobante,
-						"6" => 'N° ' . $reg->num_comprobante,
-						"7" => $reg->total_venta,
-						"8" => $reg->usuario . ' - ' . $cargo_detalle,
-						"9" => ($reg->estado == 'Iniciado') ? '<span class="label bg-blue">Iniciado</span>' : (($reg->estado == 'Entregado') ? '<span class="label bg-green">Entregado</span>' : (($reg->estado == 'Por entregar') ? '<span class="label bg-orange">Por entregar</span>' : (($reg->estado == 'En transcurso') ? '<span class="label bg-yellow">En transcurso</span>' : (($reg->estado == 'Finalizado') ? ('<span class="label bg-green">Finalizado</span>') : ('<span class="label bg-red">Anulado</span>'))))),
+						"3" => $reg->tipo_comprobante,
+						"4" => 'N° ' . $reg->num_comprobante,
+						"5" => $reg->total_venta,
+						"6" => $reg->usuario . ' - ' . $cargo_detalle,
+						"7" => ($reg->estado == 'Iniciado') ? '<span class="label bg-blue">Iniciado</span>' : (($reg->estado == 'Entregado') ? '<span class="label bg-green">Entregado</span>' : (($reg->estado == 'Por entregar') ? '<span class="label bg-orange">Por entregar</span>' : (($reg->estado == 'En transcurso') ? '<span class="label bg-yellow">En transcurso</span>' : (($reg->estado == 'Finalizado') ? ('<span class="label bg-green">Finalizado</span>') : ('<span class="label bg-red">Anulado</span>'))))),
 					);
 
 					$totalPrecioVenta += $reg->total_venta;
@@ -223,12 +196,10 @@ if (!isset($_SESSION["nombre"])) {
 						"1" => "",
 						"2" => "",
 						"3" => "",
-						"4" => "",
-						"5" => "",
-						"6" => "<strong>TOTAL</strong>",
-						"7" => '<strong>' . number_format($totalPrecioVenta, 2) . '</strong>',
-						"8" => "",
-						"9" => "",
+						"4" => "<strong>TOTAL</strong>",
+						"5" => '<strong>' . number_format($totalPrecioVenta, 2) . '</strong>',
+						"6" => "",
+						"7" => "",
 					);
 				}
 
@@ -245,21 +216,13 @@ if (!isset($_SESSION["nombre"])) {
 			case 'listarProformasCliente':
 				$idcliente = $_GET["idcliente"];
 
-				if ($cargo == "superadmin" || $cargo == "admin_total") {
-					$rspta = $clientes->listarProformasCliente($idcliente);
-				} else {
-					$rspta = $clientes->listarProformasClienteLocal($idcliente, $idlocal_session);
-				}
+				$rspta = $clientes->listarProformasCliente($idcliente);
 
 				$data = array();
 
 				function mostrarBoton($reg, $cargo, $idusuario, $buttonType)
 				{
-					if (($reg != "superadmin" && $reg != "admin_total") && $cargo == "admin") {
-						return $buttonType;
-					} elseif ($reg != "superadmin" && $cargo == "admin_total") {
-						return $buttonType;
-					} elseif ($cargo == "superadmin" || ($cargo == "cajero" && $idusuario == $_SESSION["idusuario"])) {
+					if ($cargo == "admin" || ($cargo == "vendedor" && $idusuario == $_SESSION["idusuario"])) {
 						return $buttonType;
 					} else {
 						return '';
@@ -273,17 +236,14 @@ if (!isset($_SESSION["nombre"])) {
 					$cargo_detalle = "";
 
 					switch ($reg->cargo) {
-						case 'superadmin':
-							$cargo_detalle = "Superadministrador";
-							break;
-						case 'admin_total':
-							$cargo_detalle = "Admin Total";
-							break;
 						case 'admin':
 							$cargo_detalle = "Administrador";
 							break;
-						case 'cajero':
-							$cargo_detalle = "Cajero";
+						case 'vendedor':
+							$cargo_detalle = "Vendedor";
+							break;
+						case 'cliente':
+							$cargo_detalle = "Cliente";
 							break;
 						default:
 							break;
@@ -296,13 +256,11 @@ if (!isset($_SESSION["nombre"])) {
 							'</div>',
 						"1" => '<a target="_blank" href="../reportes/exA4Proforma.php?id=' . $reg->idproforma . '"> <button class="btn btn-info" style="margin-right: 3px; height: 35px; color: white !important;"><i class="fa fa-save"></i></button></a>',
 						"2" => $reg->fecha,
-						"3" => $reg->local,
-						"4" => $reg->caja,
-						"5" => $reg->tipo_comprobante,
-						"6" => 'N° ' . $reg->num_comprobante,
-						"7" => $reg->total_venta,
-						"8" => $reg->usuario . ' - ' . $cargo_detalle,
-						"9" => ($reg->estado == 'Iniciado') ? '<span class="label bg-blue">Iniciado</span>' : (($reg->estado == 'Entregado') ? '<span class="label bg-green">Entregado</span>' : (($reg->estado == 'Por entregar') ? '<span class="label bg-orange">Por entregar</span>' : (($reg->estado == 'En transcurso') ? '<span class="label bg-yellow">En transcurso</span>' : (($reg->estado == 'Finalizado') ? ('<span class="label bg-green">Finalizado</span>') : ('<span class="label bg-red">Anulado</span>'))))),
+						"3" => $reg->tipo_comprobante,
+						"4" => 'N° ' . $reg->num_comprobante,
+						"5" => $reg->total_venta,
+						"6" => $reg->usuario . ' - ' . $cargo_detalle,
+						"7" => ($reg->estado == 'Iniciado') ? '<span class="label bg-blue">Iniciado</span>' : (($reg->estado == 'Entregado') ? '<span class="label bg-green">Entregado</span>' : (($reg->estado == 'Por entregar') ? '<span class="label bg-orange">Por entregar</span>' : (($reg->estado == 'En transcurso') ? '<span class="label bg-yellow">En transcurso</span>' : (($reg->estado == 'Finalizado') ? ('<span class="label bg-green">Finalizado</span>') : ('<span class="label bg-red">Anulado</span>'))))),
 					);
 
 					$totalPrecioVenta += $reg->total_venta;
@@ -314,13 +272,11 @@ if (!isset($_SESSION["nombre"])) {
 						"0" => "",
 						"1" => "",
 						"2" => "",
-						"3" => "",
-						"4" => "",
+						"3" => "<strong>TOTAL</strong>",
+						"4" => '<strong>' . number_format($totalPrecioVenta, 2) . '</strong>',
 						"5" => "",
-						"6" => "<strong>TOTAL</strong>",
-						"7" => '<strong>' . number_format($totalPrecioVenta, 2) . '</strong>',
-						"8" => "",
-						"9" => "",
+						"6" => "",
+						"7" => "",
 					);
 				}
 
@@ -335,11 +291,7 @@ if (!isset($_SESSION["nombre"])) {
 				break;
 
 			case 'selectClientes':
-				if ($cargo == "superadmin" || $cargo == "admin_total") {
-					$rspta = $clientes->listarClientesGeneral();
-				} else {
-					$rspta = $clientes->listarClientesGeneralPorUsuario($idlocal_session);
-				}
+				$rspta = $clientes->listarClientesGeneral();
 
 				echo '<option value="">- Seleccione -</option>';
 				while ($reg = $rspta->fetch_object()) {

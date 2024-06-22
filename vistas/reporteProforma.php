@@ -36,6 +36,10 @@ if (!isset($_SESSION["nombre"])) {
         .botones {
           width: 100% !important;
         }
+
+        .table-responsive {
+          margin: 0;
+        }
       }
 
       tbody td:nth-child(12) {
@@ -93,7 +97,6 @@ if (!isset($_SESSION["nombre"])) {
       #detallesPagosFinal tfoot tr td {
         border: none !important;
       }
-
     </style>
     <div class="content-wrapper">
       <section class="content">
@@ -102,35 +105,30 @@ if (!isset($_SESSION["nombre"])) {
             <div class="box">
               <div class="box-header with-border">
                 <h1 class="box-title">Reporte de cotizaciones generales</h1>
-                <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Reporte de cotizaciones generales</strong>" data-html="true" data-content="Módulo para ver todas las cotizaciones (proformas) realizadas en <strong>su local</strong> y los detalles de los productos." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
+                <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Reporte de cotizaciones generales</strong>" data-html="true" data-content="Módulo para ver todas las cotizaciones (proformas) realizadas y los detalles de los productos." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
                 <div class="box-tools pull-right"></div>
                 <div class="panel-body table-responsive listadoregistros" style="overflow: visible; padding-left: 0px; padding-right: 0px; padding-bottom: 0px;">
-                  <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>Fecha Inicial:</label>
                     <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio">
                   </div>
-                  <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>Fecha Final:</label>
                     <input type="date" class="form-control" name="fecha_fin" id="fecha_fin">
                   </div>
-                  <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>Tipo documento:</label>
                     <select id="tipoDocBuscar" name="tipoDocBuscar" class="form-control selectpicker" data-size="5">
                       <option value="">- Seleccione -</option>
                       <option value="COTIZACIÓN">COTIZACIÓN</option>
                     </select>
                   </div>
-                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
-                    <label>Local:</label>
-                    <select id="localBuscar" name="localBuscar" class="form-control selectpicker" data-live-search="true" data-size="5">
-                    </select>
-                  </div>
-                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>Usuario:</label>
                     <select id="usuarioBuscar" name="usuarioBuscar" class="form-control selectpicker" data-live-search="true" data-size="5">
                     </select>
                   </div>
-                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>Estado:</label>
                     <select id="estadoBuscar" name="estadoBuscar" class="form-control selectpicker" data-size="5">
                       <option value="">- Seleccione -</option>
@@ -142,25 +140,25 @@ if (!isset($_SESSION["nombre"])) {
                       <option value="EN TRANSCURSO">EN TRANSCURSO</option>
                     </select>
                   </div>
-                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>Método de pago:</label>
                     <select id="metodopagoBuscar" name="metodopagoBuscar" class="form-control selectpicker" data-live-search="true" data-size="5">
                     </select>
                   </div>
-                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>Cliente:</label>
                     <select id="clienteBuscar" name="clienteBuscar" class="form-control selectpicker" data-live-search="true" data-size="5">
                     </select>
                   </div>
-                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-6" style="padding: 5px; margin: 0px;">
                     <label>DNI / RUC:</label>
                     <input type="number" class="form-control" name="numDocBuscar" id="numDocBuscar" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="11" placeholder="Ingrese el N° de documento." required>
                   </div>
-                  <div class="form-group col-lg-3 col-md-3 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="form-group col-lg-4 col-md-4 col-sm-4 col-xs-12" style="padding: 5px; margin: 0px;">
                     <label>N° ticket:</label>
                     <input type="number" class="form-control" name="numTicketBuscar" id="numTicketBuscar" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="10" placeholder="Ingrese el N° de ticket." required>
                   </div>
-                  <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12" style="padding: 5px; margin: 0px;">
+                  <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12" style="padding: 5px; margin: 0px;">
                     <label id="labelCustom">ㅤ</label>
                     <div style="display: flex; gap: 10px;">
                       <button style="width: 100%;" class="btn btn-bcp" onclick="buscar()">Buscar</button>
@@ -177,8 +175,6 @@ if (!isset($_SESSION["nombre"])) {
                       <th>Fecha y hora</th>
                       <th>DNI / RUC</th>
                       <th style="width: 20%; min-width: 260px;">Cliente</th>
-                      <th style="width: 15%; min-width: 200px;">Almacén</th>
-                      <th>Caja</th>
                       <th>Documento</th>
                       <th>Número Ticket</th>
                       <th>Total Proforma (S/.)</th>
@@ -192,8 +188,6 @@ if (!isset($_SESSION["nombre"])) {
                       <th>Fecha y hora</th>
                       <th>DNI / RUC</th>
                       <th>Cliente</th>
-                      <th>Almacén</th>
-                      <th>Caja</th>
                       <th>Documento</th>
                       <th>Número Ticket</th>
                       <th>Total Proforma (S/.)</th>
@@ -283,7 +277,7 @@ if (!isset($_SESSION["nombre"])) {
                 </tbody>
               </table>
             </div>
-            <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-6">
               <label>Comentario interno:</label>
               <textarea type="text" class="form-control" id="comentario_interno_detalle" maxlength="1000" rows="4" autocomplete="off" disabled></textarea>
             </div>

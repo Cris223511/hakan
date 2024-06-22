@@ -654,10 +654,10 @@ class PDF_Invoice extends FPDF
 	 *                              Reporte Design                                 *
 	 *******************************************************************************/
 
-	function encabezado($y, $logo, $ext_logo, $num_comprobante, $tipo_comprobante, $local, $local_ruc, $estado, $caja, $usuario, $content1, $empresa, $content2)
+	function encabezado($y, $logo, $ext_logo, $ruc, $num_comprobante, $tipo_comprobante, $estado, $usuario, $content1, $empresa, $content2)
 	{
 		# LOGO #
-		$this->Image('../files/logo_reportes/' . $logo, 15, 10, 30, 30, $ext_logo);
+		$this->Image('../files/logo_reportes/' . $logo, 13, 10, null, 16, $ext_logo);
 
 		# EMPRESA #
 		$this->SetXY(13.5, $y + 41);
@@ -692,7 +692,7 @@ class PDF_Invoice extends FPDF
 		$this->SetXY(62, $y + 19.5);
 		$this->SetFont('Arial', 'B', 10);
 		$this->SetTextColor(0, 0, 0);
-		$this->MultiCell(0, 5, mb_convert_encoding("RUC: $local_ruc", 'ISO-8859-1', 'UTF-8'), 0, 'C', false);
+		$this->MultiCell(0, 5, mb_convert_encoding("RUC: $ruc", 'ISO-8859-1', 'UTF-8'), 0, 'C', false);
 
 		# NÚMERO DE COMPROBANTE #
 		$r1  = $this->w - 65;
@@ -718,20 +718,15 @@ class PDF_Invoice extends FPDF
 		$this->Cell($r2 - $r1 - 1, 5, $num_comprobante, 0, 0, "C");
 
 		# ESTADO #
-		$this->SetXY(66, $y + 30);
-		$this->SetFont('Arial', 'B', 8);
-		$this->MultiCell(130, 4, mb_convert_encoding(mb_strtoupper("Estado: $estado"), 'ISO-8859-1', 'UTF-8'), 0, 'R', false);
-
-		# CAJA #
 		$this->SetXY(66, $y + 34);
 		$this->SetFont('Arial', 'B', 8);
-		$this->MultiCell(130, 4, mb_convert_encoding(mb_strtoupper("Caja: $caja"), 'ISO-8859-1', 'UTF-8'), 0, 'R', false);
+		$this->MultiCell(130, 4, mb_convert_encoding(mb_strtoupper("Estado: $estado"), 'ISO-8859-1', 'UTF-8'), 0, 'R', false);
 
 		# USUARIO #
 		$this->SetXY(66, $y + 41);
 		$this->SetFont('Arial', 'B', 12);
 		$this->SetTextColor(0, 0, 0);
-		$this->MultiCell(130, 4, mb_convert_encoding(mb_strtoupper("Cajero: $usuario"), 'ISO-8859-1', 'UTF-8'), 0, 'R', false);
+		$this->MultiCell(130, 4, mb_convert_encoding(mb_strtoupper("Vendedor: $usuario"), 'ISO-8859-1', 'UTF-8'), 0, 'R', false);
 
 		# DATOS DEL USUARIO #
 		$this->SetXY(66, $y + 47.5);
@@ -877,7 +872,7 @@ class PDF_Invoice extends FPDF
 		return $y;
 	}
 
-	function creditosReporte($y, $tipo_comprobante, $auspiciado)
+	function creditosReporte($y, $tipo_comprobante)
 	{
 		# TÍTULO REPRESENTACIÓN #
 		$this->SetXY(20, $y += 3);
@@ -888,12 +883,5 @@ class PDF_Invoice extends FPDF
 		$this->SetXY(20, $y += 4.5);
 		$this->SetFont('Arial', 'B', 8);
 		$this->MultiCell(80, 3, mb_convert_encoding(mb_strtoupper("$tipo_comprobante"), 'ISO-8859-1', 'UTF-8'), 0, 'R', false);
-
-		if ($auspiciado != "") {
-			# POWERED BY #
-			$this->SetXY(13.5, $y += 34);
-			$this->SetFont('Arial', 'I', 8);
-			$this->MultiCell(0, 3, mb_convert_encoding(("Powered by $auspiciado"), 'ISO-8859-1', 'UTF-8'), 0, 'L', false);
-		}
 	}
 }

@@ -26,12 +26,11 @@ if (!isset($_SESSION["nombre"])) {
 
     $pdf->SetFillColor(232, 232, 232);
     $pdf->SetFont('Arial', 'B', 10);
-    $pdf->Cell(45, 6, 'Nombre', 1, 0, 'C', 1);
-    $pdf->Cell(55, 6, 'Local', 1, 0, 'C', 1);
-    $pdf->Cell(26, 6, 'Documento', 1, 0, 'C', 1);
-    $pdf->Cell(33, 6, utf8_decode('Número'), 1, 0, 'C', 1);
-    $pdf->Cell(22, 6, utf8_decode('Teléfono'), 1, 0, 'C', 1);
-    $pdf->Cell(54, 6, 'Email', 1, 0, 'C', 1);
+    $pdf->Cell(65, 6, 'Nombre', 1, 0, 'C', 1);
+    $pdf->Cell(36, 6, 'Documento', 1, 0, 'C', 1);
+    $pdf->Cell(43, 6, utf8_decode('Número'), 1, 0, 'C', 1);
+    $pdf->Cell(32, 6, utf8_decode('Teléfono'), 1, 0, 'C', 1);
+    $pdf->Cell(59, 6, 'Email', 1, 0, 'C', 1);
     $pdf->Cell(40, 6, 'Fecha', 1, 0, 'C', 1);
 
     $pdf->Ln(10);
@@ -39,20 +38,14 @@ if (!isset($_SESSION["nombre"])) {
     $clientes = new Cliente();
 
     $idusuario = $_SESSION["idusuario"];
-    $idlocal_session = $_SESSION["idlocal"];
     $cargo = $_SESSION["cargo"];
 
-    if ($cargo == "superadmin" || $cargo == "admin_total") {
-      $rspta = $clientes->listarClientes();
-    } else {
-      $rspta = $clientes->listarClientesPorUsuario($idlocal_session);
-    }
+    $rspta = $clientes->listarClientes();
 
-    $pdf->SetWidths(array(45, 55, 26, 33, 22, 54, 40));
+    $pdf->SetWidths(array(65, 36, 43, 32, 59, 40));
 
     while ($reg = $rspta->fetch_object()) {
       $nombre = $reg->nombre;
-      $local = $reg->local;
       $tipo_documento = $reg->tipo_documento;
       $num_documento = $reg->num_documento;
       $telefono = ($reg->telefono == "") ? "Sin registrar" : $reg->telefono;
@@ -60,7 +53,7 @@ if (!isset($_SESSION["nombre"])) {
       $fecha = $reg->fecha;
 
       $pdf->SetFont('Arial', '', 10);
-      $pdf->Row(array(utf8_decode($nombre), utf8_decode($local), $tipo_documento, $num_documento, $telefono, $email, utf8_decode($fecha)));
+      $pdf->Row(array(utf8_decode($nombre), $tipo_documento, $num_documento, $telefono, $email, utf8_decode($fecha)));
     }
 
     $pdf->Output();

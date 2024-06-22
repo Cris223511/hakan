@@ -66,21 +66,13 @@ switch ($_GET["op"]) {
 
 	case 'listar':
 
-		if ($cargo == "superadmin" || $cargo == "admin" || $cargo == "admin_total" || $cargo == "cajero") {
-			$rspta = $categorias->listar();
-		} else {
-			$rspta = $categorias->listarPorUsuario($idusuario);
-		}
+		$rspta = $categorias->listar();
 
 		$data = array();
 
 		function mostrarBoton($reg, $cargo, $idusuario, $buttonType)
 		{
-			if (($reg != "superadmin" && $reg != "admin_total") && $cargo == "admin") {
-				return $buttonType;
-			} elseif ($reg != "superadmin" && $cargo == "admin_total") {
-				return $buttonType;
-			} elseif ($cargo == "superadmin" || ($cargo == "cajero" && $idusuario == $_SESSION["idusuario"])) {
+			if ($cargo == "admin" || ($cargo == "vendedor" && $idusuario == $_SESSION["idusuario"])) {
 				return $buttonType;
 			} else {
 				return '';
@@ -91,17 +83,14 @@ switch ($_GET["op"]) {
 			$cargo_detalle = "";
 
 			switch ($reg->cargo) {
-				case 'superadmin':
-					$cargo_detalle = "Superadministrador";
-					break;
-				case 'admin_total':
-					$cargo_detalle = "Admin Total";
-					break;
 				case 'admin':
 					$cargo_detalle = "Administrador";
 					break;
-				case 'cajero':
-					$cargo_detalle = "Cajero";
+				case 'vendedor':
+					$cargo_detalle = "Vendedor";
+					break;
+				case 'cliente':
+					$cargo_detalle = "Cliente";
 					break;
 				default:
 					break;

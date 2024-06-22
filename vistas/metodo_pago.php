@@ -17,9 +17,11 @@ if (!isset($_SESSION["nombre"])) {
             <div class="box">
               <div class="box-header with-border">
                 <h1 class="box-title">Métodos de pago
-                  <button class="btn btn-bcp" id="btnagregar" onclick="mostrarform(true)">
-                    <i class="fa fa-plus-circle"></i> Agregar
-                  </button>
+                  <?php if ($_SESSION["cargo"] == "admin" || $_SESSION["cargo"] == "vendedor") { ?>
+                    <button class="btn btn-bcp" id="btnagregar" onclick="mostrarform(true)">
+                      <i class="fa fa-plus-circle"></i> Agregar
+                    </button>
+                  <?php } ?>
                   <?php if ($_SESSION["cargo"] == "admin") { ?>
                     <a href="../reportes/rptmetodopago.php" target="_blank">
                       <button class="btn btn-secondary" style="color: black !important;">
@@ -27,7 +29,7 @@ if (!isset($_SESSION["nombre"])) {
                       </button>
                     </a>
                   <?php } ?>
-                  <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Métodos de pago</strong>" data-html="true" data-content="Módulo para registrar los métodos de pago y sean utilizados en las ventas, proformas y compras.<br><br><strong>Nota:</strong> Los métodos de pago que usted registre serán visible y utilizados por todos (solo puede editar, anular y eliminar los métodos de pago que ustéd agrega y no el de los demás)." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
+                  <a href="#" data-toggle="popover" data-placement="bottom" title="<strong>Métodos de pago</strong>" data-html="true" data-content="Módulo para registrar los métodos de pago y sean utilizados en las ventas y proformas." style="color: #002a8e; font-size: 18px;">&nbsp;<i class="fa fa-question-circle"></i></a>
                 </h1>
                 <div class="box-tools pull-right">
                 </div>

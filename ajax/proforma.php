@@ -107,11 +107,7 @@ if (!isset($_SESSION["nombre"])) {
 
 				function mostrarBoton($reg, $cargo, $idusuario, $buttonType)
 				{
-					if (($reg != "superadmin" && $reg != "admin_total") && $cargo == "admin") {
-						return $buttonType;
-					} elseif ($reg != "superadmin" && $cargo == "admin_total") {
-						return $buttonType;
-					} elseif ($cargo == "superadmin" || ($cargo == "cajero" && $idusuario == $_SESSION["idusuario"])) {
+					if ($cargo == "admin" || ($cargo == "vendedor" && $idusuario == $_SESSION["idusuario"])) {
 						return $buttonType;
 					} else {
 						return '';
@@ -139,17 +135,14 @@ if (!isset($_SESSION["nombre"])) {
 					$cargo_detalle = "";
 
 					switch ($reg->cargo) {
-						case 'superadmin':
-							$cargo_detalle = "Superadministrador";
-							break;
-						case 'admin_total':
-							$cargo_detalle = "Admin Total";
-							break;
 						case 'admin':
 							$cargo_detalle = "Administrador";
 							break;
-						case 'cajero':
-							$cargo_detalle = "Cajero";
+						case 'vendedor':
+							$cargo_detalle = "Vendedor";
+							break;
+						case 'cliente':
+							$cargo_detalle = "Cliente";
 							break;
 						default:
 							break;

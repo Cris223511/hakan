@@ -164,14 +164,14 @@ if (!isset($_SESSION["nombre"])) {
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                   <div class="box box-primary">
                     <div class="box-body">
-                      <canvas id="ventas" width="300" height="280"></canvas>
+                      <canvas id="ventas" width="300" height="180"></canvas>
                     </div>
                   </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                   <div class="box box-primary">
                     <div class="box-body">
-                      <canvas id="proformas" width="300" height="280"></canvas>
+                      <canvas id="proformas" width="300" height="180"></canvas>
                     </div>
                   </div>
                 </div>

@@ -427,9 +427,11 @@ if (!isset($_SESSION["nombre"])) {
             <div class="box caja">
               <div class="box-header with-border">
                 <h1 class="box-title">Proformas
-                  <button class="btn btn-bcp" id="btnagregar" onclick="validarCaja();">
-                    <i class="fa fa-plus-circle"></i> Nueva proforma
-                  </button>
+                  <?php if ($_SESSION["cargo"] == "admin" || $_SESSION["cargo"] == "vendedor") { ?>
+                    <button class="btn btn-bcp" id="btnagregar" onclick="validarCaja();">
+                      <i class="fa fa-plus-circle"></i> Nueva proforma
+                    </button>
+                  <?php } ?>
                   <?php if ($_SESSION["cargo"] == "admin") { ?>
                     <a href="../reportes/rptproformas.php" target="_blank">
                       <button class="btn btn-secondary" style="color: black !important;">
@@ -989,11 +991,11 @@ if (!isset($_SESSION["nombre"])) {
                   </div>
                 <?php } ?>
                 <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0;">
-                  <h4 class="modal-title infotitulo" style="margin: 0; margin-bottom: 10px; padding: 0; font-weight: bold;">COMENTARIO INTERNO (*):</h4>
+                  <h4 class="modal-title infotitulo" style="margin: 0; margin-bottom: 10px; padding: 0; font-weight: bold;">COMENTARIO INTERNO:</h4>
                   <textarea type="text" class="form-control" id="comentario_interno" maxlength="1000" rows="4" placeholder="Ingrese un comentario interno." autocomplete="off"></textarea>
                 </div>
                 <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0;">
-                  <h4 class="modal-title infotitulo" style="margin: 0; margin-bottom: 10px; padding: 0; font-weight: bold;">COMENTARIO EXTERNO (*):</h4>
+                  <h4 class="modal-title infotitulo" style="margin: 0; margin-bottom: 10px; padding: 0; font-weight: bold;">COMENTARIO EXTERNO:</h4>
                   <textarea type="text" class="form-control" id="comentario_externo" maxlength="1000" rows="4" placeholder="Ingrese un comentario externo." autocomplete="off"></textarea>
                 </div>
               </div>
@@ -1003,7 +1005,7 @@ if (!isset($_SESSION["nombre"])) {
                 </div>
                 <div style="margin-bottom: 10px; display: flex; justify-content: start; flex-wrap: wrap; align-items: center; gap: 5px;">
                   <h4 class="modal-title infotitulo" style="margin: 0; margin-bottom: 10px; margin-top: 10px; padding: 0; font-weight: bold;">VUELTOS</h4>
-                  <a href="#" data-toggle="popover" data-placement="right" title="Vuelto" data-html="true" data-content="Asegúrese que el vuelto sea <strong>mayor igual</strong> a 0." style="color: #002a8e; font-size: 16px;"><i class="fa fa-question-circle"></i></a>
+                  <a href="#" data-toggle="popover" data-placement="right" title="Vuelto" data-html="true" data-content="Asegúrese que el vuelto sea <strong>mayor igual</strong> a 0." style="color: #002a8e; font-size: 18px;"><i class="fa fa-question-circle"></i></a>
                 </div>
                 <div style="padding: 10px; border-top: 1px solid #d2d6de; display: flex; justify-content: space-between; align-items: center;">
                   <h5 class="infotitulo" style="margin: 0; padding: 0;">VUELTO</h5>

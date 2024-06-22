@@ -84,7 +84,7 @@
           return match.charAt(0).toUpperCase() + match.slice(1).toLowerCase();
         });
 
-        document.title = fullTitle;
+        document.title = fullTitle + " | Hakan Import S.A.C.";
       }
 
       setTitleFromBoxTitle('.box-title');
@@ -237,7 +237,7 @@
         if (!table) return;
 
         var columnIndices = Array.from(table.querySelectorAll("th")).reduce((indices, th, index) => {
-          if (["CLIENTE", "PROVEEDOR", "NOMBRE", "NOMBRES", "DESCRIPCIÓN", "DESCRIPCIÓN DEL LOCAL", "ALMACÉN"].includes(th.innerText.trim())) {
+          if (["CLIENTE", "PROVEEDOR", "NOMBRE", "NOMBRES", "DESCRIPCIÓN", "ALMACÉN"].includes(th.innerText.trim())) {
             indices.push(index);
           }
           return indices;
@@ -278,7 +278,7 @@
 
     <script>
       function evitarCaracteresEspecialesCamposNumericos() {
-        var camposNumericos = document.querySelectorAll('input[type="number"]:not(#ganancia)');
+        var camposNumericos = document.querySelectorAll('input[type="number"]');
 
         camposNumericos.forEach(function(campo) {
           campo.addEventListener('keydown', function(event) {
@@ -410,7 +410,13 @@
         campos.forEach(function(campo) {
           let numValor = $(campo).val();
           if (typeof numValor !== 'undefined') {
+            if (numValor === "") {
+              actualizarCorrelativoProducto();
+              return;
+            }
+
             numValor = numValor.trim();
+
             let num = numValor === '' ? siguienteCorrelativo || 0 : parseInt(numValor, 10);
             let numFormateado = num < 10000 ? num.toString().padStart(5, '0') : num.toString();
             $(campo).val(numFormateado);
@@ -457,7 +463,7 @@
       //           }
       //         });
       //       </script>';
-    } elseif ($_SESSION["cargo"] != "superadmin" && $_SESSION["cargo"] != "admin_total" && $_SESSION["cargo"] != "admin") {
+    } elseif ($_SESSION["cargo"] != "admin") {
       echo '<script>
               $(document).ajaxSuccess(function(event, xhr, settings) {
                 $(".dt-buttons").hide();

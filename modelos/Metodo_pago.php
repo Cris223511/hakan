@@ -74,13 +74,13 @@ class MetodoPago
 
 	public function listar()
 	{
-		$sql = "SELECT m.idmetodopago, u.idusuario, u.nombre as nombre, u.cargo as cargo, m.titulo, m.descripcion, m.imagen, DATE_FORMAT(m.fecha_hora, '%d-%m-%Y %H:%i:%s') as fecha, m.estado FROM metodo_pago m LEFT JOIN usuario u ON m.idusuario = u.idusuario WHERE m.eliminado = '0' ORDER BY m.idmetodopago DESC";
+		$sql = "SELECT m.idmetodopago, u.idusuario, u.nombre as nombre, u.cargo as cargo, m.titulo, m.descripcion, m.imagen, DATE_FORMAT(m.fecha_hora, '%d-%m-%Y %H:%i:%s') as fecha, m.estado FROM metodo_pago m LEFT JOIN usuario u ON m.idusuario = u.idusuario WHERE m.eliminado = '0' AND m.idmetodopago <> '0' ORDER BY m.idmetodopago DESC";
 		return ejecutarConsulta($sql);
 	}
 
 	public function listarPorUsuario($idusuario)
 	{
-		$sql = "SELECT m.idmetodopago, u.idusuario, u.nombre as nombre, u.cargo as cargo, m.titulo, m.descripcion, m.imagen, DATE_FORMAT(m.fecha_hora, '%d-%m-%Y %H:%i:%s') as fecha, m.estado FROM metodo_pago m LEFT JOIN usuario u ON m.idusuario = u.idusuario WHERE m.idusuario = '$idusuario' AND m.eliminado = '0' ORDER BY m.idmetodopago DESC";
+		$sql = "SELECT m.idmetodopago, u.idusuario, u.nombre as nombre, u.cargo as cargo, m.titulo, m.descripcion, m.imagen, DATE_FORMAT(m.fecha_hora, '%d-%m-%Y %H:%i:%s') as fecha, m.estado FROM metodo_pago m LEFT JOIN usuario u ON m.idusuario = u.idusuario WHERE m.idusuario = '$idusuario' AND m.eliminado = '0' AND m.idmetodopago <> '0' ORDER BY m.idmetodopago DESC";
 		return ejecutarConsulta($sql);
 	}
 

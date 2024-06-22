@@ -4,12 +4,6 @@ var tabla;
 function init() {
 	listar();
 
-	$.post("../ajax/locales.php?op=selectLocalesUsuario", function (r) {
-		console.log(r);
-		$("#localBuscar").html(r);
-		$('#localBuscar').selectpicker('refresh');
-	});
-
 	$.post("../ajax/usuario.php?op=selectUsuarios", function (r) {
 		console.log(r);
 		$("#usuarioBuscar").html(r);
@@ -36,7 +30,6 @@ function listar() {
 	let param1 = "";
 	let param2 = "";
 	let param3 = "";
-	let param4 = "";
 	let param5 = "";
 	let param6 = "";
 	let param7 = "";
@@ -70,7 +63,7 @@ function listar() {
 			{
 				url: '../ajax/reporte.php?op=listarProformas',
 				type: "get",
-				data: { param1: param1, param2: param2, param3: param3, param4: param4, param5: param5, param6: param6, param7: param7, param8: param8, param9: param9, param10: param10 },
+				data: { param1: param1, param2: param2, param3: param3, param5: param5, param6: param6, param7: param7, param8: param8, param9: param9, param10: param10 },
 				dataType: "json",
 				error: function (e) {
 					console.log(e.responseText);
@@ -96,7 +89,7 @@ function listar() {
 }
 
 function resetear() {
-	const selects = ["fecha_inicio", "fecha_fin", "tipoDocBuscar", "localBuscar", "estadoBuscar", "clienteBuscar", "numDocBuscar", "numTicketBuscar", "usuarioBuscar", "metodopagoBuscar"];
+	const selects = ["fecha_inicio", "fecha_fin", "tipoDocBuscar", "estadoBuscar", "clienteBuscar", "numDocBuscar", "numTicketBuscar", "usuarioBuscar", "metodopagoBuscar"];
 
 	for (const selectId of selects) {
 		$("#" + selectId).val("");
@@ -110,7 +103,6 @@ function buscar() {
 	let param1 = "";
 	let param2 = "";
 	let param3 = "";
-	let param4 = "";
 	let param5 = "";
 	let param6 = "";
 	let param7 = "";
@@ -122,7 +114,6 @@ function buscar() {
 	const fecha_inicio = document.getElementById("fecha_inicio");
 	const fecha_fin = document.getElementById("fecha_fin");
 	const tipoDocBuscar = document.getElementById("tipoDocBuscar");
-	const localBuscar = document.getElementById("localBuscar");
 	const usuarioBuscar = document.getElementById("usuarioBuscar");
 	const estadoBuscar = document.getElementById("estadoBuscar");
 	const metodopagoBuscar = document.getElementById("metodopagoBuscar");
@@ -130,7 +121,7 @@ function buscar() {
 	const numDocBuscar = document.getElementById("numDocBuscar");
 	const numTicketBuscar = document.getElementById("numTicketBuscar");
 
-	if (fecha_inicio.value == "" && fecha_fin.value == "" && tipoDocBuscar.value == "" && localBuscar.value == "" && usuarioBuscar.value == "" && estadoBuscar.value == "" && metodopagoBuscar.value == "" && clienteBuscar.value == "" && numDocBuscar.value == "" && numTicketBuscar.value == "") {
+	if (fecha_inicio.value == "" && fecha_fin.value == "" && tipoDocBuscar.value == "" && usuarioBuscar.value == "" && estadoBuscar.value == "" && metodopagoBuscar.value == "" && clienteBuscar.value == "" && numDocBuscar.value == "" && numTicketBuscar.value == "") {
 		bootbox.alert("Debe seleccionar al menos un campo para realizar la búsqueda.");
 		return;
 	}
@@ -143,7 +134,6 @@ function buscar() {
 	param1 = fecha_inicio.value;
 	param2 = fecha_fin.value;
 	param3 = tipoDocBuscar.value;
-	param4 = localBuscar.value;
 	param5 = usuarioBuscar.value;
 	param6 = estadoBuscar.value;
 	param7 = metodopagoBuscar.value;
@@ -177,7 +167,7 @@ function buscar() {
 			{
 				url: '../ajax/reporte.php?op=listarProformas',
 				type: "get",
-				data: { param1: param1, param2: param2, param3: param3, param4: param4, param5: param5, param6: param6, param7: param7, param8: param8, param9: param9, param10: param10 },
+				data: { param1: param1, param2: param2, param3: param3, param5: param5, param6: param6, param7: param7, param8: param8, param9: param9, param10: param10 },
 				dataType: "json",
 				error: function (e) {
 					console.log(e.responseText);

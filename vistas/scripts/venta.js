@@ -1,8 +1,5 @@
 var tabla;
 let lastNumComp = 0;
-let idCajaFinal = 0;
-
-var idlocal = 0;
 
 inicializeGLightbox();
 
@@ -16,34 +13,8 @@ function actualizarCorrelativo() {
 	});
 }
 
-function actualizarCorrelativoLocal(idlocal) {
-	if (idlocal === "") {
-		return;
-	}
-
-	$.post("../ajax/venta.php?op=getLastNumComprobanteLocal", { idlocal: idlocal }, function (e) {
-		console.log(e);
-		const obj = JSON.parse(e);
-		console.log(obj);
-		if (obj.idcaja == 0) {
-			bootbox.alert("El local seleccionado no tiene una caja disponible.");
-			$("#idlocal_session").val("");
-			$("#idlocal_session").selectpicker('refresh');
-			$("#num_comprobante_final1").text(lastNumComp);
-		} else if (obj.estado != "aperturado") {
-			bootbox.alert("La caja del local seleccionado no se encuentra aperturada.");
-			$("#idlocal_session").val("");
-			$("#idlocal_session").selectpicker('refresh');
-			$("#num_comprobante_final1").text(lastNumComp);
-		} else {
-			lastNumComp = generarSiguienteCorrelativo(obj.last_num_comprobante);
-			idCajaFinal = obj.idcaja;
-		}
-	});
-}
-
-function actualizarCorrelativoProducto(idlocal) {
-	$.post("../ajax/articulo.php?op=getLastCodigo", { idlocal: idlocal }, function (num) {
+function actualizarCorrelativoProducto() {
+	$.post("../ajax/articulo.php?op=getLastCodigo", function (num) {
 		console.log(num);
 		const partes = num.match(/([a-zA-Z]+)(\d+)/) || ["", "", ""];
 
@@ -68,7 +39,6 @@ function init() {
 	$("#formulario3").on("submit", function (e) { guardaryeditar3(e); });
 	$("#formulario4").on("submit", function (e) { guardaryeditar4(e); });
 	$("#formSunat").on("submit", function (e) { buscarSunat(e); });
-	$("#formulario5").on("submit", function (e) { guardaryeditar5(e); });
 	$("#formulario6").on("submit", function (e) { guardaryeditar6(e); });
 	$("#formulario7").on("submit", function (e) { guardaryeditar7(e); });
 	$("#formulario8").on("submit", function (e) { guardaryeditar8(e); });
@@ -92,10 +62,7 @@ function init() {
 		console.log(obj);
 
 		const selects = {
-			"idmarca": $("#idmarca, #idmarcaBuscar"),
 			"idcategoria": $("#idcategoria, #idcategoriaBuscar"),
-			"idlocal": $("#idlocal3"),
-			"idmedida": $("#idmedida"),
 		};
 
 		for (const selectId in selects) {
@@ -107,31 +74,18 @@ function init() {
 					select.empty();
 					select.html('<option value="">- Seleccione -</option>');
 					obj[atributo].forEach(function (opcion) {
-						if (atributo != "local") {
-							select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
-						} else {
-							select.append('<option value="' + opcion.id + '" data-local-ruc="' + opcion.ruc + '">' + opcion.titulo + '</option>');
-						}
+						select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
 					});
 					select.selectpicker('refresh');
 				}
 			}
 		}
 
-		$("#idlocal").val($("#idlocal option:first").val());
-		$("#idlocal").selectpicker('refresh');
-
 		$('#idcategoria').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregarCategoria(event)');
 		$('#idcategoria').closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
-
-		$('#idmarca').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregarMarca(event)');
-		$('#idmarca').closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
-
-		$('#idmedida').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'agregarMedida(event)');
-		$('#idmedida').closest('.form-group').find('input[type="text"]').attr('maxlength', '40');
-
-		actualizarRUC5();
 	});
+
+	actualizarCorrelativoProducto();
 }
 
 function listarTodosActivos(selectId) {
@@ -145,9 +99,7 @@ function listarTodosActivos(selectId) {
 			select.empty();
 			select.html('<option value="">- Seleccione -</option>');
 			obj[atributo].forEach(function (opcion) {
-				if (atributo !== "almacen") {
-					select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
-				}
+				select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
 			});
 			select.selectpicker('refresh');
 		}
@@ -198,194 +150,30 @@ function agregarCategoria(e) {
 	}
 }
 
-function agregarMarca(e) {
-	let inputValue = $('#idmarca').closest('.form-group').find('input[type="text"]');
-
-	if (e.key === "Enter") {
-		if ($('.no-results').is(':visible')) {
-			e.preventDefault();
-			$("#titulo3").val(inputValue.val());
-
-			var formData = new FormData($("#formularioMarcas")[0]);
-
-			$.ajax({
-				url: "../ajax/marcas.php?op=guardaryeditar",
-				type: "POST",
-				data: formData,
-				contentType: false,
-				processData: false,
-
-				success: function (datos) {
-					datos = limpiarCadena(datos);
-					if (!datos) {
-						console.log("No se recibieron datos del servidor.");
-						return;
-					} else if (datos == "El nombre de la marca que ha ingresado ya existe.") {
-						bootbox.alert(datos);
-						return;
-					} else {
-						// bootbox.alert(datos);
-						listarTodosActivos("idmarca");
-						$("#idmarca3").val("");
-						$("#titulo3").val("");
-						$("#descripcion7").val("");
-					}
-				}
-			});
-		}
-	}
-}
-
-function agregarMedida(e) {
-	let inputValue = $('#idmedida').closest('.form-group').find('input[type="text"]');
-
-	if (e.key === "Enter") {
-		if ($('.no-results').is(':visible')) {
-			e.preventDefault();
-			$("#titulo4").val(inputValue.val());
-
-			var formData = new FormData($("#formularioMedidas")[0]);
-
-			$.ajax({
-				url: "../ajax/medidas.php?op=guardaryeditar",
-				type: "POST",
-				data: formData,
-				contentType: false,
-				processData: false,
-
-				success: function (datos) {
-					datos = limpiarCadena(datos);
-					if (!datos) {
-						console.log("No se recibieron datos del servidor.");
-						return;
-					} else if (datos == "El nombre de la medida que ha ingresado ya existe.") {
-						bootbox.alert(datos);
-						return;
-					} else {
-						// bootbox.alert(datos);
-						listarTodosActivos("idmedida");
-						$("#idmedida4").val("");
-						$("#titulo4").val("");
-						$("#descripcion8").val("");
-					}
-				}
-			});
-		}
-	}
-}
-
-function changeGanancia() {
-	let precio_venta = $("#precio_venta").val();
-	let precio_compra = $("#precio_compra").val();
-
-	// Verificar si ambos campos están llenos
-	if (precio_venta !== '' && precio_compra !== '') {
-		let ganancia = precio_venta - precio_compra;
-		$("#ganancia").val(ganancia.toFixed(2));
-	}
-}
-
-function actualizarRUC() {
-	const selectLocal = document.getElementById("idlocal");
-	const localRUCInput = document.getElementById("local_ruc");
-	const selectedOption = selectLocal.options[selectLocal.selectedIndex];
-
-	if (selectedOption.value !== "") {
-		const localRUC = selectedOption.getAttribute('data-local-ruc');
-		localRUCInput.value = localRUC;
-	} else {
-		localRUCInput.value = "";
-	}
-}
-
-function actualizarRUC2() {
-	const selectLocal = document.getElementById("idlocal2");
-	const localRUCInput = document.getElementById("local_ruc2");
-	const selectedOption = selectLocal.options[selectLocal.selectedIndex];
-
-	if (selectedOption.value !== "") {
-		const localRUC = selectedOption.getAttribute('data-local-ruc');
-		localRUCInput.value = localRUC;
-	} else {
-		localRUCInput.value = "";
-	}
-}
-
-function actualizarRUC4() {
-	const selectLocal = document.getElementById("idlocal4");
-	const localRUCInput = document.getElementById("local_ruc4");
-	const selectedOption = selectLocal.options[selectLocal.selectedIndex];
-
-	if (selectedOption.value !== "") {
-		const localRUC = selectedOption.getAttribute('data-local-ruc');
-		localRUCInput.value = localRUC;
-	} else {
-		localRUCInput.value = "";
-	}
-}
-
-function actualizarRUC5() {
-	const selectLocal = document.getElementById("idlocal3");
-	const localRUCInput = document.getElementById("local_ruc3");
-	const selectedOption = selectLocal.options[selectLocal.selectedIndex];
-
-	if (selectedOption.value !== "") {
-		const localRUC = selectedOption.getAttribute('data-local-ruc');
-		localRUCInput.value = localRUC;
-	} else {
-		localRUCInput.value = "";
-	}
-
-	idlocal = $("#idlocal3").val();
-	actualizarCorrelativoProducto(idlocal);
-}
-
 //Función limpiar modal de artículos
 function limpiarModalArticulos() {
 	$("#codigo_barra").val("");
-	$("#cod_part_1").val("");
-	$("#cod_part_2").val("");
 	$("#nombre3").val("");
-	$("#local_ruc3").val("");
 	$("#descripcion5").val("");
 	$("#talla").val("");
 	$("#color").val("");
-	$("#peso").val("");
 	$("#stock").val("");
 	$("#stock_minimo").val("");
 	$("#imagenmuestra").attr("src", "");
 	$("#imagenmuestra").hide();
 	$("#imagenactual").val("");
 	$("#imagen2").val("");
-	$("#precio_compra").val("");
 	$("#precio_venta").val("");
-	$("#ganancia").val("0.00");
-	$("#comision").val("");
 	$("#print").hide();
 	$("#idarticulo").val("");
 
 	$("#idcategoria").val($("#idcategoria option:first").val());
 	$("#idcategoria").selectpicker('refresh');
-	$("#idlocal3").val($("#idlocal3 option:first").val());
-	$("#idlocal3").selectpicker('refresh');
-	$("#idmarca").val($("#idmarca option:first").val());
-	$("#idmarca").selectpicker('refresh');
-	$("#idmedida").val($("#idmedida option:first").val());
-	$("#idmedida").selectpicker('refresh');
 
-	idlocal = 0;
-
-	actualizarRUC5();
-
-	$(".btn1").show();
-	$(".btn2").hide();
-
-	detenerEscaneo();
-
+	// detenerEscaneo();
 }
 
 function limpiar() {
-	limpiarModalEmpleados();
 	limpiarModalMetodoPago();
 	limpiarModalClientes();
 	limpiarModalClientes2();
@@ -394,9 +182,6 @@ function limpiar() {
 	limpiarModalArticulos();
 
 	listarDatos();
-
-	$("#comisionar").val(1);
-	$("#comisionar").selectpicker("refresh");
 
 	$("#detalles tbody").empty();
 	$("#inputsMontoMetodoPago").empty();
@@ -408,14 +193,13 @@ function limpiar() {
 
 	$("#comentario_interno_final").val("");
 	$("#comentario_externo_final").val("");
-	$("#idlocal_session_final").val("");
 	$("#igvFinal").val("0.00");
 	$("#total_venta_final").val("");
 	$("#vuelto_final").val("");
 }
 
 function limpiarTodo() {
-	bootbox.confirm("¿Estás seguro de limpiar los datos de la venta?, perderá todos los datos registrados.", function (result) {
+	bootbox.confirm("¿Estás seguro de limpiar los datos de la venta?, se perderá todos los datos registrados.", function (result) {
 		if (result) {
 			limpiar();
 		}
@@ -433,34 +217,17 @@ function frmDetalles(bool) {
 function guardaryeditar8(e) {
 	e.preventDefault(); //No se activará la acción predeterminada del evento
 
-	var codigoBarra = $("#codigo_barra").val();
+	// var codigoBarra = $("#codigo_barra").val();
 
-	var formatoValido = /^[0-9]{1} [0-9]{2} [0-9]{4} [0-9]{1} [0-9]{4} [0-9]{1}$/.test(codigoBarra);
+	// var formatoValido = /^[0-9]{1} [0-9]{2} [0-9]{4} [0-9]{1} [0-9]{4} [0-9]{1}$/.test(codigoBarra);
 
-	if (!formatoValido && codigoBarra != "") {
-		bootbox.alert("El formato del código de barra no es válido. El formato correcto es: X XX XXXX X XXXX X");
-		$("#btnGuardarProducto").prop("disabled", false);
-		return;
-	}
-
-	// var stock = parseFloat($("#stock").val());
-	// var stock_minimo = parseFloat($("#stock_minimo").val());
-
-	// if (stock_minimo > stock) {
-	// 	bootbox.alert("El stock mínimo no puede ser mayor que el stock normal.");
+	// if (!formatoValido && codigoBarra != "") {
+	// 	bootbox.alert("El formato del código de barra no es válido. El formato correcto es: X XX XXXX X XXXX X");
+	// 	$("#btnGuardarProducto").prop("disabled", false);
 	// 	return;
 	// }
 
-	var precio_compra = parseFloat($("#precio_compra").val());
-	var precio_venta = parseFloat($("#precio_venta").val());
-
-	if (precio_compra > precio_venta) {
-		bootbox.alert("El precio de compra no puede ser mayor que el precio de venta.");
-		return;
-	}
-
 	$("#btnGuardarProducto").prop("disabled", true);
-	$("#ganancia").prop("disabled", false);
 
 	formatearNumeroCorrelativo();
 
@@ -473,7 +240,7 @@ function guardaryeditar8(e) {
 
 	$("#ganancia").prop("disabled", true);
 
-	let detalles = frmDetallesVisible() ? obtenerDetalles() : { talla: '', color: '', idmedida: '0', peso: '0.00' };
+	let detalles = frmDetallesVisible() ? obtenerDetalles() : { talla: '', color: '' };
 
 	for (let key in detalles) {
 		formData.append(key, detalles[key]);
@@ -488,7 +255,7 @@ function guardaryeditar8(e) {
 
 		success: function (datos) {
 			datos = limpiarCadena(datos);
-			if (datos == "El código de barra del producto que ha ingresado ya existe." || datos == "El código del producto que ha ingresado ya existe en el local seleccionado.") {
+			if (datos == "El código del producto que ha ingresado ya existe.") {
 				bootbox.alert(datos);
 				$("#btnGuardarProducto").prop("disabled", false);
 				return;
@@ -498,14 +265,13 @@ function guardaryeditar8(e) {
 			$("#btnGuardar").prop("disabled", false);
 			bootbox.alert(datos);
 
-			$.post("../ajax/venta.php?op=listarTodosLocalActivosPorUsuario", function (data) {
+			$.post("../ajax/venta.php?op=listarTodosActivos", function (data) {
 				const obj = JSON.parse(data);
 
 				let articulo = obj.articulo;
-				let servicio = obj.servicio;
 
-				listarSelectsArticulos(articulo, servicio);
-				listarArticulos(articulo, servicio);
+				listarSelectsArticulos(articulo);
+				listarArticulos(articulo);
 			});
 		}
 	});
@@ -515,14 +281,10 @@ function obtenerDetalles() {
 	let detalles = {
 		talla: $("#talla").val(),
 		color: $("#color").val(),
-		idmedida: $("#idmedida").val(),
-		peso: $("#peso").val()
 	};
 
 	if (!detalles.talla) detalles.talla = '';
 	if (!detalles.color) detalles.color = '';
-	if (!detalles.idmedida) detalles.idmedida = '0';
-	if (!detalles.peso) detalles.peso = '0.00';
 
 	return detalles;
 }
@@ -531,182 +293,20 @@ function frmDetallesVisible() {
 	return $("#frmDetalles").is(":visible");
 }
 
-var quaggaIniciado = false;
-
-function escanear() {
-
-	// Intentar acceder a la cámara
-	navigator.mediaDevices.getUserMedia({ video: true })
-		.then(function (stream) {
-			$(".btn1").hide();
-			$(".btn2").show();
-
-			// Acceso a la cámara exitoso, inicializa Quagga
-			Quagga.init({
-				inputStream: {
-					name: "Live",
-					type: "LiveStream",
-					target: document.querySelector('#camera')
-				},
-				decoder: {
-					readers: ["code_128_reader"]
-				}
-			}, function (err) {
-				if (err) {
-					console.log(err);
-					return;
-				}
-				console.log("Initialization finished. Ready to start");
-				Quagga.start();
-				quaggaIniciado = true;
-			});
-
-			$("#camera").show();
-
-			Quagga.onDetected(function (data) {
-				console.log(data.codeResult.code);
-				var codigoBarra = data.codeResult.code;
-				document.getElementById('codigo').value = codigoBarra;
-			});
-		})
-		.catch(function (error) {
-			bootbox.alert("No se encontró una cámara conectada.");
-		});
-}
-
-function detenerEscaneo() {
-	if (quaggaIniciado) {
-		Quagga.stop();
-		$(".btn1").show();
-		$(".btn2").hide();
-		$("#camera").hide();
-		formatearNumero();
-		quaggaIniciado = false;
-	}
-}
-
-$("#codigo_barra").on("input", function () {
-	formatearNumero();
-});
-
-function formatearNumero() {
-	var codigo = $("#codigo_barra").val().replace(/\s/g, '').replace(/\D/g, '');
-	var formattedCode = '';
-
-	for (var i = 0; i < codigo.length; i++) {
-		if (i === 1 || i === 3 || i === 7 || i === 8 || i === 12 || i === 13) {
-			formattedCode += ' ';
-		}
-
-		formattedCode += codigo[i];
-	}
-
-	var maxLength = parseInt($("#codigo_barra").attr("maxlength"));
-	if (formattedCode.length > maxLength) {
-		formattedCode = formattedCode.substring(0, maxLength);
-	}
-
-	$("#codigo_barra").val(formattedCode);
-	generarbarcode(0);
-}
-
-function borrar() {
-	$("#codigo_barra").val("");
-	$("#codigo_barra").focus();
-	$("#print").hide();
-}
-
-//función para generar el número aleatorio del código de barra
-function generar() {
-	var codigo = "7 75 ";
-	codigo += generarNumero(10000, 999) + " ";
-	codigo += Math.floor(Math.random() * 10) + " ";
-	codigo += generarNumero(100, 9) + " ";
-	codigo += Math.floor(Math.random() * 10);
-	$("#codigo_barra").val(codigo);
-	generarbarcode(1);
-}
-
-function generarNumero(max, min) {
-	var numero = Math.floor(Math.random() * (max - min + 1)) + min;
-	var numeroFormateado = ("0000" + numero).slice(-4);
-	return numeroFormateado;
-}
-
-// Función para generar el código de barras
-function generarbarcode(param) {
-
-	if (param == 1) {
-		var codigo = $("#codigo_barra").val().replace(/\s/g, '');
-		console.log(codigo.length);
-
-		if (!/^\d+$/.test(codigo)) {
-			bootbox.alert("El código de barra debe contener solo números.");
-			return;
-		} else if (codigo.length !== 13) {
-			bootbox.alert("El código de barra debe tener 13 dígitos.");
-			return;
-		} else {
-			codigo = codigo.slice(0, 1) + " " + codigo.slice(1, 3) + " " + codigo.slice(3, 7) + " " + codigo.slice(7, 8) + " " + codigo.slice(8, 12) + " " + codigo.slice(12, 13);
-		}
-	} else {
-		var codigo = $("#codigo_barra").val()
-	}
-
-	if (codigo != "") {
-		JsBarcode("#barcode", codigo);
-		$("#codigo_barra").val(codigo);
-		$("#print").show();
-	} else {
-		$("#print").hide();
-	}
-}
-
-function convertirMayusProduct() {
+function convertirMayus() {
 	var inputCodigo = document.getElementById("cod_part_1");
 	inputCodigo.value = inputCodigo.value.toUpperCase();
 }
 
-//Función para imprimir el código de barras
-function imprimir() {
-	$("#print").printArea();
-}
-
-function validarCaja() {
-	$.post("../ajax/venta.php?op=validarCaja", function (e) {
-		e = limpiarCadena(e);
-		console.log(e);
-		const obj = JSON.parse(e);
-		console.log(obj);
-
-		if (e == "null") {
-			bootbox.alert("Usted debe registrar una caja para realizar la venta.");
-		} else if (obj.estado != "aperturado") {
-			bootbox.alert("Usted necesita aperturar su caja para realizar la venta.");
-		} else {
-			mostrarform(true);
-			actualizarCorrelativo();
-			idCajaFinal = obj.idcaja;
-
-			// setTimeout(() => {
-			// 	document.querySelector(".sidebar-toggle").click();
-			// }, 500);
-		}
-	});
-}
-
 function listarDatos() {
-	$.post("../ajax/venta.php?op=listarTodosLocalActivosPorUsuario", function (data) {
+	$.post("../ajax/venta.php?op=listarTodosActivos", function (data) {
 		const obj = JSON.parse(data);
 		console.log(obj);
 
 		let articulo = obj.articulo || [];
-		let servicio = obj.servicio || [];
 		let metodo_pago = obj.metodo_pago || [];
 		let clientes = obj.clientes || [];
 		let categoria = obj.categoria || [];
-		let personales = obj.personales || [];
-		let locales = obj.locales || [];
 
 		$("#categoria").empty();
 		$("#pagos").empty();
@@ -714,27 +314,22 @@ function listarDatos() {
 		$("#productos1").empty();
 		$("#productos2").empty();
 		$("#idcliente").empty();
-		$("#idpersonal").empty();
-		$("#idlocal").empty();
-		$("#idlocal2").empty();
-		$("#idlocal3").empty();
-		$("#idlocal4").empty();
 
-		listarArticulos(articulo, servicio);
+		listarArticulos(articulo);
 		listarCategoria(categoria);
 		listarMetodoPago(metodo_pago);
-		listarSelects(articulo, servicio, clientes, personales, locales);
+		listarSelects(articulo, clientes);
 	});
 }
 
 function listarTodosLosArticulos() {
-	$.post("../ajax/venta.php?op=listarTodosLocalActivosPorUsuario", function (data) {
+	$(".caja-categoria").removeClass("categoriaSelected");
+	$.post("../ajax/venta.php?op=listarTodosActivos", function (data) {
 		const obj = JSON.parse(data);
 
-		let articulo = obj.articulo;
-		let servicio = obj.servicio;
+		let articulo = obj.articulo || [];
 
-		listarArticulos(articulo, servicio);
+		listarArticulos(articulo);
 	});
 }
 
@@ -743,15 +338,15 @@ function listarArticulosPorCategoria(idcategoria) {
 		const articulos = JSON.parse(data).articulo || [];
 		console.log(articulos);
 
-		listarArticulos(articulos, []);
+		listarArticulos(articulos);
 	});
 }
 
-function listarArticulos(articulos, servicios) {
+function listarArticulos(articulos) {
 	$("#productos").empty();
 	let productosContainer = $("#productos");
 
-	if ((articulos.length > 0 || servicios.length > 0) && !(articulos.length === 0 && servicios.length === 0)) {
+	if ((articulos.length > 0) && !(articulos.length === 0)) {
 		articulos.forEach((articulo) => {
 
 			articulo.stock = +articulo.stock; // Convierte a número
@@ -766,39 +361,17 @@ function listarArticulos(articulos, servicios) {
 						<a href="../files/articulos/${articulo.imagen}" class="galleria-lightbox">
 							<img src="../files/articulos/${articulo.imagen}" class="img-fluid">
 						</a>
-						<h1>${articulo.nombre}</h1>
-						<h4>${articulo.marca}</h4>
+						<h1>${capitalizarTodasLasPalabras(articulo.nombre)}</h1>
+						<h4>${capitalizarTodasLasPalabras(articulo.codigo_producto)}</h4>
 						<div class="subcaja-gris">
 							<span>STOCK: <strong>${stockHtml}</strong></span>
 							${labelHtml}
 							<span><strong>S/ ${articulo.precio_venta}</strong></span>
 						</div>
-						<a style="width: 100%;" onclick="verificarEmpleado('producto','${articulo.id}','${articulo.nombre}','${articulo.local}','${articulo.stock}','${articulo.precio_compra}','${articulo.precio_venta}','${articulo.comision}','${articulo.codigo}')"><button type="button" class="btn btn-warning" style="height: 33.6px; width: 100%;">AGREGAR</button></a>
+						<a style="width: 100%;" onclick="verificarProducto('${articulo.id}','${articulo.nombre}','${articulo.stock}','${articulo.precio_venta}','${articulo.codigo_producto}')"><button type="button" class="btn btn-warning" style="height: 33.6px; width: 100%;">AGREGAR</button></a>
 					</div>
 				</div>
 			`;
-
-			productosContainer.append(html);
-		});
-
-		servicios.forEach((servicio) => {
-			let html = `
-					<div class="draggable" style="padding: 10px; width: 180px;">
-						<div class="caja-productos">
-							<a href="../files/articulos/${servicio.imagen}" class="galleria-lightbox">
-								<img src="../files/articulos/${servicio.imagen}" class="img-fluid">
-							</a>
-							<h1>${servicio.nombre}</h1>
-							<h4>${servicio.marca}</h4>
-							<div class="subcaja-gris">
-								<span><strong>ㅤ</strong></span>
-								<span class="label bg-green" style="width: min-content;">Disponible</span>
-								<span><strong>S/ ${servicio.precio_venta}</strong></span>
-							</div>
-							<a style="width: 100%;" onclick="verificarEmpleado('servicio','${servicio.id}','${servicio.nombre}','Sin registrar','${servicio.stock}','${servicio.precio_compra}','${servicio.precio_venta}','${servicio.comision}','${servicio.codigo}')"><button type="button" class="btn btn-warning" style="height: 33.6px; width: 100%;">AGREGAR</button></a>
-						</div>
-					</div>
-				`;
 
 			productosContainer.append(html);
 		});
@@ -809,7 +382,7 @@ function listarArticulos(articulos, servicios) {
 		let html = `
 				<div class="draggable" style="padding: 10px; width: 100%;">
 					<div class="caja-productos-vacia">
-						<h4>no se encontraron productos y/o servicios.</h4>
+						<h4>no se encontraron productos.</h4>
 					</div>
 				</div>
 			`;
@@ -873,25 +446,7 @@ function listarMetodoPago(metodosPago) {
 	pagosContainer.append(htmlFinal);
 }
 
-function listarSelects(articulos, servicios, clientes, personales, locales) {
-	let selectProductos1 = $("#productos1");
-	selectProductos1.empty();
-	selectProductos1.append('<option value="">Lectora de códigos.</option>');
-	selectProductos1.append('<option disabled>PRODUCTOS:</option>');
-
-	articulos.forEach((articulo) => {
-		let optionHtml = `<option data-tipo-producto="producto" data-nombre="${articulo.nombre}" data-local="${articulo.local}" data-stock="${articulo.stock}" data-precio-compra="${articulo.precio_compra}" data-precio-venta="${articulo.precio_venta}" data-comision="${articulo.comision}" data-codigo="${articulo.codigo}" value="${articulo.id}">${articulo.nombre} - ${articulo.marca} - ${articulo.codigo.replace(/\s/g, '')} - (STOCK: ${articulo.stock})</option>`;
-		selectProductos1.append(optionHtml);
-	});
-
-	selectProductos1.append('<option disabled>SERVICIOS:</option>');
-
-	servicios.forEach((servicio, index) => {
-		let numeroCorrelativo = ('0' + (index + 1)).slice(-2);
-		let optionHtml = `<option data-tipo-producto="servicio" data-nombre="${servicio.nombre}" data-local="Sin registrar" data-stock="${servicio.stock}" data-precio-compra="${servicio.precio_compra}" data-precio-venta="${servicio.precio_venta}" data-comision="${servicio.comision}" data-codigo="${servicio.codigo}" value="${servicio.id}">N° ${numeroCorrelativo}: ${capitalizarPrimeraLetra(servicio.nombre)} - Código de servicio: N° ${servicio.codigo.replace(/\s/g, '')}</option>`;
-		selectProductos1.append(optionHtml);
-	});
-
+function listarSelects(articulos, clientes) {
 	let selectProductos2 = $("#productos2");
 	selectProductos2.empty();
 	selectProductos2.append('<option value="">Buscar productos.</option>');
@@ -899,15 +454,7 @@ function listarSelects(articulos, servicios, clientes, personales, locales) {
 	selectProductos2.append('<option disabled>PRODUCTOS:</option>');
 
 	articulos.forEach((articulo) => {
-		let optionHtml = `<option data-tipo-producto="producto" data-nombre="${articulo.nombre}" data-local="${articulo.local}" data-stock="${articulo.stock}" data-precio-compra="${articulo.precio_compra}" data-precio-venta="${articulo.precio_venta}" data-comision="${articulo.comision}" data-codigo="${articulo.codigo}" value="${articulo.id}">${articulo.nombre} - ${articulo.marca} - ${articulo.local} - (STOCK: ${articulo.stock})</option>`;
-		selectProductos2.append(optionHtml);
-	});
-
-	selectProductos2.append('<option disabled>SERVICIOS:</option>');
-
-	servicios.forEach((servicio, index) => {
-		let numeroCorrelativo = ('0' + (index + 1)).slice(-2);
-		let optionHtml = `<option data-tipo-producto="servicio" data-nombre="${servicio.nombre}" data-local="Sin registrar" data-stock="${servicio.stock}" data-precio-compra="${servicio.precio_compra}" data-precio-venta="${servicio.precio_venta}" data-comision="${servicio.comision}" data-codigo="${servicio.codigo}" value="${servicio.id}">N° ${numeroCorrelativo}: ${capitalizarPrimeraLetra(servicio.nombre)} - Código de servicio: N° ${servicio.codigo.replace(/\s/g, '')}</option>`;
+		let optionHtml = `<option data-nombre="${articulo.nombre}" data-stock="${articulo.stock}" data-precio-venta="${articulo.precio_venta}" data-codigo="${articulo.codigo_producto}" value="${articulo.id}">${articulo.nombre} - ${articulo.codigo_producto} - (STOCK: ${articulo.stock})</option>`;
 		selectProductos2.append(optionHtml);
 	});
 
@@ -916,90 +463,13 @@ function listarSelects(articulos, servicios, clientes, personales, locales) {
 	selectClientes.append('<option value="">Buscar cliente.</option>');
 
 	clientes.forEach((cliente) => {
-		let optionHtml = `<option value="${cliente.id}">${cliente.nombre} - ${cliente.tipo_documento}: ${cliente.num_documento} ${((cliente.local != null) ? " - " + cliente.local : "")}</option>`;
+		let optionHtml = `<option value="${cliente.id}">${cliente.nombre} - ${cliente.tipo_documento}: ${cliente.num_documento}</option>`;
 		selectClientes.append(optionHtml);
 	});
 
-	let selectEmpleados = $("#idpersonal");
-	selectEmpleados.empty();
-	selectEmpleados.append('<option value="">SIN EMPLEADOS A COMISIONAR.</option>');
-
-	personales.forEach((personal) => {
-		let optionHtml = `<option value="${personal.id}">${capitalizarTodasLasPalabras(personal.nombre)} - ${capitalizarTodasLasPalabras(personal.local)}</option>`;
-		selectEmpleados.append(optionHtml);
-	});
-
-	let selectLocales1 = $("#idlocal");
-	selectLocales1.empty();
-	selectLocales1.append('<option value="">- Seleccione -</option>');
-
-	locales.forEach((local) => {
-		let optionHtml = `<option value="${local.id}" data-local-ruc="${local.local_ruc}">${local.nombre}</option>`;
-		selectLocales1.append(optionHtml);
-	});
-
-	let selectLocales2 = $("#idlocal2");
-	selectLocales2.empty();
-	selectLocales2.append('<option value="">- Seleccione -</option>');
-
-	locales.forEach((local) => {
-		let optionHtml = `<option value="${local.id}" data-local-ruc="${local.local_ruc}">${local.nombre}</option>`;
-		selectLocales2.append(optionHtml);
-	});
-
-	let selectLocales3 = $("#idlocal3");
-	selectLocales3.empty();
-	selectLocales3.append('<option value="">- Seleccione -</option>');
-
-	locales.forEach((local) => {
-		let optionHtml = `<option value="${local.id}" data-local-ruc="${local.local_ruc}">${local.nombre}</option>`;
-		selectLocales3.append(optionHtml);
-	});
-
-	let selectLocales4 = $("#idlocal4");
-	selectLocales4.empty();
-	selectLocales4.append('<option value="">- Seleccione -</option>');
-
-	locales.forEach((local) => {
-		let optionHtml = `<option value="${local.id}" data-local-ruc="${local.local_ruc}">${local.nombre}</option>`;
-		selectLocales4.append(optionHtml);
-	});
-
-	if ($("#idlocal_session").length) {
-		let selectLocales5 = $("#idlocal_session");
-		selectLocales5.empty();
-		selectLocales5.append('<option value="">- Seleccione -</option>');
-
-		locales.forEach((local) => {
-			let optionHtml = `<option value="${local.id}">${local.nombre} - ${local.local_ruc}</option>`;
-			selectLocales5.append(optionHtml);
-		});
-
-		selectLocales5.selectpicker('refresh');
-	}
-
-	let selectLocales6 = $("#idlocal_session_final");
-	selectLocales6.empty();
-	selectLocales6.append('<option value="">- Seleccione -</option>');
-
-	locales.forEach((local) => {
-		let optionHtml = `<option value="${local.id}">${local.nombre} - ${local.local_ruc}</option>`;
-		selectLocales6.append(optionHtml);
-	});
-
 	// Después de agregar todas las opciones, actualizamos el plugin selectpicker
-	selectProductos1.selectpicker('refresh');
 	selectProductos2.selectpicker('refresh');
 	selectClientes.selectpicker('refresh');
-	selectEmpleados.selectpicker('refresh');
-	selectLocales1.selectpicker('refresh');
-	selectLocales2.selectpicker('refresh');
-	selectLocales3.selectpicker('refresh');
-	selectLocales4.selectpicker('refresh');
-
-	actualizarRUC();
-	actualizarRUC2();
-	actualizarRUC4();
 
 	$('#idcliente').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'checkEnter(event)');
 	$('#idcliente').closest('.form-group').find('input[type="text"]').attr('oninput', 'checkDNI(this)');
@@ -1008,44 +478,17 @@ function listarSelects(articulos, servicios, clientes, personales, locales) {
 	colocarNegritaStocksSelects();
 }
 
-function listarSelectsArticulos(articulos, servicios) {
-	let selectProductos1 = $("#productos1");
-	selectProductos1.empty();
-	selectProductos1.append('<option value="">Lectora de códigos.</option>');
-	selectProductos1.append('<option disabled>PRODUCTOS:</option>');
-
-	articulos.forEach((articulo) => {
-		let optionHtml = `<option data-tipo-producto="producto" data-nombre="${articulo.nombre}" data-local="${articulo.local}" data-stock="${articulo.stock}" data-precio-compra="${articulo.precio_compra}" data-precio-venta="${articulo.precio_venta}" data-comision="${articulo.comision}" data-codigo="${articulo.codigo}" value="${articulo.id}">${articulo.nombre} - ${articulo.marca} - ${articulo.codigo.replace(/\s/g, '')} - (STOCK: ${articulo.stock})</option>`;
-		selectProductos1.append(optionHtml);
-	});
-
-	selectProductos1.append('<option disabled>SERVICIOS:</option>');
-
-	servicios.forEach((servicio, index) => {
-		let numeroCorrelativo = ('0' + (index + 1)).slice(-2);
-		let optionHtml = `<option data-tipo-producto="servicio" data-nombre="${servicio.nombre}" data-local="Sin registrar" data-stock="${servicio.stock}" data-precio-compra="${servicio.precio_compra}" data-precio-venta="${servicio.precio_venta}" data-comision="${servicio.comision}" data-codigo="${servicio.codigo}" value="${servicio.id}">N° ${numeroCorrelativo}: ${capitalizarPrimeraLetra(servicio.nombre)} - Código de servicio: N° ${servicio.codigo.replace(/\s/g, '')}</option>`;
-		selectProductos1.append(optionHtml);
-	});
-
+function listarSelectsArticulos(articulos) {
 	let selectProductos2 = $("#productos2");
 	selectProductos2.empty();
 	selectProductos2.append('<option value="">Buscar productos.</option>');
 	selectProductos2.append('<option disabled>PRODUCTOS:</option>');
 
 	articulos.forEach((articulo) => {
-		let optionHtml = `<option data-tipo-producto="producto" data-nombre="${articulo.nombre}" data-local="${articulo.local}" data-stock="${articulo.stock}" data-precio-compra="${articulo.precio_compra}" data-precio-venta="${articulo.precio_venta}" data-comision="${articulo.comision}" data-codigo="${articulo.codigo}" value="${articulo.id}">${articulo.nombre} - ${articulo.marca} - ${articulo.local} - (STOCK: ${articulo.stock})</option>`;
+		let optionHtml = `<option data-nombre="${articulo.nombre}" data-stock="${articulo.stock}" data-precio-venta="${articulo.precio_venta}" data-codigo="${articulo.codigo_producto}" value="${articulo.id}">${articulo.nombre} - ${articulo.codigo_producto} - (STOCK: ${articulo.stock})</option>`;
 		selectProductos2.append(optionHtml);
 	});
 
-	selectProductos2.append('<option disabled>SERVICIOS:</option>');
-
-	servicios.forEach((servicio, index) => {
-		let numeroCorrelativo = ('0' + (index + 1)).slice(-2);
-		let optionHtml = `<option data-tipo-producto="servicio" data-nombre="${servicio.nombre}" data-local="Sin registrar" data-stock="${servicio.stock}" data-precio-compra="${servicio.precio_compra}" data-precio-venta="${servicio.precio_venta}" data-comision="${servicio.comision}" data-codigo="${servicio.codigo}" value="${servicio.id}">N° ${numeroCorrelativo}: ${capitalizarPrimeraLetra(servicio.nombre)} - Código de servicio: N° ${servicio.codigo.replace(/\s/g, '')}</option>`;
-		selectProductos2.append(optionHtml);
-	});
-
-	selectProductos1.selectpicker('refresh');
 	selectProductos2.selectpicker('refresh');
 
 	colocarNegritaStocksSelects();
@@ -1054,7 +497,7 @@ function listarSelectsArticulos(articulos, servicios) {
 function colocarNegritaStocksSelects() {
 	$('#productos1, #productos2').closest('.form-group').find('.text').each(function () {
 		var contenido = $(this).html();
-		contenido = contenido.replace(/(PRODUCTOS:|SERVICIOS:)/g, '<strong>$1</strong>');
+		contenido = contenido.replace(/(PRODUCTOS:)/g, '<strong>$1</strong>');
 		contenido = contenido.replace(/\((STOCK: \d+)\)/g, '<strong>($1)</strong>');
 		contenido = contenido.replace(/\b(N° \d+)\b/, '<strong>$1</strong>');
 		$(this).html(contenido);
@@ -1091,26 +534,20 @@ function checkDNI(value) {
 
 function seleccionarProducto(selectElement) {
 	var selectedOption = selectElement.options[selectElement.selectedIndex];
-	verificarEmpleado(selectedOption.getAttribute('data-tipo-producto'), selectedOption.value, selectedOption.getAttribute('data-nombre'), selectedOption.getAttribute('data-local'), selectedOption.getAttribute('data-stock'), selectedOption.getAttribute('data-precio-compra'), selectedOption.getAttribute('data-precio-venta'), selectedOption.getAttribute('data-comision'), selectedOption.getAttribute('data-codigo'))
+	verificarProducto(selectedOption.value, selectedOption.getAttribute('data-nombre'), selectedOption.getAttribute('data-stock'), selectedOption.getAttribute('data-precio-venta'), selectedOption.getAttribute('data-codigo'))
 	selectElement.value = "";
 	$(selectElement).selectpicker('refresh');
 	colocarNegritaStocksSelects();
 }
 
-// MODAL EMPLEADOS
-
 let idarticuloGlobal = "";
 let nombreGlobal = "";
-let localGlobal = "";
 let stockGlobal = "";
-let precioCompraGlobal = "";
 let precioVentaGlobal = "";
-let comisionGlobal = "";
 let codigoGlobal = "";
-let tipoProductoFinal = "";
 
-function verificarEmpleado(tipoarticulo, idarticulo, nombre, local, stock, precio_compra, precio_venta, comision, codigo) {
-	var existeProducto = validarTablaProductos(tipoarticulo, idarticulo);
+function verificarProducto(idarticulo, nombre, stock, precio_venta, codigo) {
+	var existeProducto = validarTablaProductos(idarticulo);
 
 	if (stock == 0) {
 		bootbox.alert("El producto seleccionado se encuentra sin stock.");
@@ -1118,41 +555,26 @@ function verificarEmpleado(tipoarticulo, idarticulo, nombre, local, stock, preci
 	}
 
 	if (!existeProducto) {
-		if ($("#comisionar").val() == 2 || $("#comisionar").val() == "2") {
-			$('#myModal1').modal('show');
-			limpiarModalEmpleados();
+		console.log("esto traigo =) =>", idarticulo, nombre, stock, precio_venta, codigo);
 
-			console.log("esto traigo =) =>", tipoarticulo, idarticulo, nombre, local, stock, precio_compra, precio_venta, comision, codigo);
+		idarticuloGlobal = idarticulo;
+		nombreGlobal = nombre;
+		stockGlobal = stock;
+		precioVentaGlobal = precio_venta;
+		codigoGlobal = codigo;
 
-			idarticuloGlobal = idarticulo;
-			nombreGlobal = nombre;
-			localGlobal = local;
-			stockGlobal = stock;
-			precioCompraGlobal = precio_compra;
-			precioVentaGlobal = precio_venta;
-			comisionGlobal = comision;
-			codigoGlobal = codigo;
-			tipoProductoFinal = tipoarticulo;
-
-			$("#ProductoSeleccionado").html(capitalizarTodasLasPalabras(nombre));
-			$("#PrecioSeleccionado").html(`S/. ${precio_venta == '' ? parseFloat(0).toFixed(2) : precio_venta}`);
-			$("#ComisionSeleccionado").html(`S/. ${comision == '' ? parseFloat(0).toFixed(2) : comision}`);
-
-			evaluarBotonEmpleado();
-		} else {
-			agregarDetalle(tipoarticulo, idarticulo, '0', nombre, local, stock, precio_compra, precio_venta, comision, codigo);
-		}
+		agregarDetalle(idarticulo, nombre, stock, precio_venta, codigo);
 	} else {
-		bootbox.alert("No puedes agregar el mismo artículo o servicio dos veces.");
+		bootbox.alert("No puedes agregar el mismo artículo dos veces.");
 	}
 }
 
-function validarTablaProductos(tipoarticulo, idarticulo) {
+function validarTablaProductos(idarticulo) {
 	var existeProducto = false;
 
 	if ($('#detalles .filas').length > 0) {
 		$('#detalles .filas').each(function () {
-			var idArticuloActual = $(this).find(tipoarticulo === "producto" ? 'input[name="idarticulo[]"]' : 'input[name="idservicio[]"]').val();
+			var idArticuloActual = $(this).find('input[name="idarticulo[]"]').val();
 
 			if (idArticuloActual === idarticulo) {
 				existeProducto = true;
@@ -1162,40 +584,6 @@ function validarTablaProductos(tipoarticulo, idarticulo) {
 	}
 
 	return existeProducto;
-}
-
-function evaluarBotonEmpleado() {
-	let valorEmpleado = $("#idpersonal").val();
-	console.log(valorEmpleado);
-
-	if (valorEmpleado == "") {
-		$("#btnGuardarArticulo").hide();
-		$("#empleadoSeleccionado").html("SIN SELECCIONAR");
-	} else {
-		$("#btnGuardarArticulo").show();
-		let textoSeleccionado = $("#idpersonal option:selected").text();
-		$("#empleadoSeleccionado").html(capitalizarTodasLasPalabras(textoSeleccionado));
-		$("#btnGuardarArticulo").attr("onclick", `agregarDetalle('${tipoProductoFinal}','${idarticuloGlobal}', '${valorEmpleado}', '${nombreGlobal}', '${localGlobal}', '${stockGlobal}', '${precioCompraGlobal}', '${precioVentaGlobal}', '${comisionGlobal}', '${codigoGlobal}'); limpiarModalEmpleados();`);
-	}
-}
-
-function limpiarModalEmpleados() {
-	$("#idpersonal").val("");
-	$("#idpersonal").selectpicker('refresh');
-
-	$("#empleadoSeleccionado").html("SIN SELECCIONAR");
-	$("#ProductoSeleccionado").html("");
-	$("#PrecioSeleccionado").html("");
-
-	$("#btnGuardarArticulo").removeAttr("onclick");
-	$("#btnGuardarArticulo").hide();
-
-	idarticuloGlobal = "";
-	nombreGlobal = "";
-	precioCompraGlobal = "";
-	precioVentaGlobal = "";
-	codigoGlobal = "";
-	tipoProductoFinal = "";
 }
 
 // METODO DE PAGO
@@ -1327,7 +715,7 @@ function listarClientes(idcliente) {
 		selectClientes.append('<option value="">Buscar cliente.</option>');
 
 		clientes.forEach((cliente) => {
-			let optionHtml = `<option value="${cliente.id}">${cliente.nombre} - ${cliente.tipo_documento}: ${cliente.num_documento} ${((cliente.local != null) ? " - " + cliente.local : "")}</option>`;
+			let optionHtml = `<option value="${cliente.id}">${cliente.nombre} - ${cliente.tipo_documento}: ${cliente.num_documento}</option>`;
 			selectClientes.append(optionHtml);
 		});
 
@@ -1351,13 +739,8 @@ function limpiarModalClientes() {
 
 	habilitarTodoModalCliente();
 
-	$("#idlocal").val($("#idlocal option:first").val());
-	$("#idlocal").selectpicker('refresh');
-
 	$("#btnSunat").prop("disabled", false);
 	$("#btnGuardarCliente").prop("disabled", true);
-
-	actualizarRUC();
 }
 
 function guardaryeditar3(e) {
@@ -1455,11 +838,7 @@ function buscarSunat(e) {
 				$("#telefono").prop("disabled", obj.hasOwnProperty("telefono") && obj.telefono !== "" ? true : false);
 				$("#email").prop("disabled", obj.hasOwnProperty("email") && obj.email !== "" ? true : false);
 
-				$("#idlocal").prop("disabled", false);
 				$("#descripcion2").prop("disabled", false);
-
-				$("#idlocal").val($("#idlocal option:first").val());
-				$("#idlocal").selectpicker('refresh');
 
 				$("#sunat").val("");
 
@@ -1477,8 +856,6 @@ function habilitarTodoModalCliente() {
 	$("#direccion").prop("disabled", true);
 	$("#telefono").prop("disabled", true);
 	$("#email").prop("disabled", true);
-	$("#idlocal").prop("disabled", true);
-	$("#local_ruc").prop("disabled", true);
 	$("#descripcion2").prop("disabled", true);
 }
 
@@ -1489,8 +866,6 @@ function deshabilitarTodoModalCliente() {
 	$("#direccion").prop("disabled", false);
 	$("#telefono").prop("disabled", false);
 	$("#email").prop("disabled", false);
-	$("#idlocal").prop("disabled", false);
-	$("#local_ruc").prop("disabled", false);
 	$("#descripcion2").prop("disabled", false);
 }
 
@@ -1506,12 +881,7 @@ function limpiarModalClientes2() {
 	$("#email2").val("");
 	$("#descripcion3").val("");
 
-	$("#idlocal2").val($("#idlocal2 option:first").val());
-	$("#idlocal2").selectpicker('refresh');
-
 	$("#btnGuardarCliente2").prop("disabled", false);
-
-	actualizarRUC2();
 }
 
 function guardaryeditar4(e) {
@@ -1560,12 +930,7 @@ function limpiarModalClientes4() {
 	$("#email3").val("");
 	$("#descripcion4").val("");
 
-	$("#idlocal4").val($("#idlocal4 option:first").val());
-	$("#idlocal4").selectpicker('refresh');
-
 	$("#btnGuardarCliente4").prop("disabled", false);
-
-	actualizarRUC4();
 }
 
 function guardaryeditar6(e) {
@@ -1604,7 +969,7 @@ function verificarModalPrecuenta() {
 	}
 
 	if ($('.filas').length === 0) {
-		bootbox.alert("Debe agregar por lo menos un producto o servicio.");
+		bootbox.alert("Debe agregar por lo menos un producto.");
 		return;
 	}
 
@@ -1621,7 +986,7 @@ function verificarModalPrecuenta() {
 	});
 
 	if (!detallesValidos) {
-		bootbox.alert("Debe llenar los campos de los artículos o servicios.");
+		bootbox.alert("Debe llenar los campos de los artículos.");
 		return;
 	}
 
@@ -1684,14 +1049,12 @@ function actualizarTablaDetallesProductosPrecuenta() {
 function actualizarTablaDetallesProductosVenta() {
 	$('#detallesProductosPrecuenta .filas').each(function (index, fila) {
 		let id1 = $(fila).find('input[name="idarticulo[]"]').val();
-		let id2 = $(fila).find('input[name="idservicio[]"]').val();
 		let precioVenta = $(fila).find('input[name="precio_venta[]"]').val();
 		let descuento = $(fila).find('input[name="descuento[]"]').val();
 		let cantidad = $(fila).find('input[name="cantidad[]"]').val();
 
 		let filaVenta = $('#detalles .filas').eq(index);
 		filaVenta.find('input[name="idarticulo[]"]').val(id1);
-		filaVenta.find('input[name="idservicio[]"]').val(id2);
 		filaVenta.find('input[name="precio_venta[]"]').val(precioVenta);
 		filaVenta.find('input[name="descuento[]"]').val(descuento);
 		filaVenta.find('input[name="cantidad[]"]').val(cantidad);
@@ -1700,7 +1063,7 @@ function actualizarTablaDetallesProductosVenta() {
 
 function verificarCantidadArticulos(param) {
 	if ($('.filas').length === 0 && param != 1) {
-		bootbox.alert("Debe agregar por lo menos un producto o servicio.");
+		bootbox.alert("Debe agregar por lo menos un producto.");
 		$('#myModal7').modal('hide');
 	}
 }
@@ -1794,7 +1157,6 @@ function guardaryeditar7(e) {
 	actualizarTablaDetallesProductosVenta();
 
 	// actualizo el total final de la venta, comentarios e impuesto
-	let idlocalSession = $("#idlocal_session").length ? $("#idlocal_session").val() : '';
 	let comentarioInterno = $("#comentario_interno").val();
 	let comentarioExterno = $("#comentario_externo").val();
 	let impuesto = $("#igv").val();
@@ -1803,7 +1165,6 @@ function guardaryeditar7(e) {
 
 	console.log(impuesto);
 
-	$("#idlocal_session_final").val(idlocalSession);
 	$("#comentario_interno_final").val(comentarioInterno);
 	$("#comentario_externo_final").val(comentarioExterno);
 	$("#igvFinal").val(impuesto);
@@ -1828,14 +1189,13 @@ function limpiarModalPrecuenta() {
 
 	$("#igv").val("0.00");
 	$("#vuelto").val("0.00");
-	$("#idlocal_session").val("");
-	$("#idlocal_session").selectpicker('refresh');
 	$("#comentario_interno").val("");
 	$("#comentario_externo").val("");
 }
 
 function mostrarform(flag) {
 	if (flag) {
+		actualizarCorrelativo();
 		$(".listadoregistros").hide();
 		$(".caja").hide();
 		$("#formularioregistros").show();
@@ -1988,16 +1348,16 @@ function buscar() {
 
 function guardaryeditar(e) {
 	e.preventDefault();
+	actualizarCorrelativo();
 
 	var formData = new FormData($("#formulario")[0]);
 	formData.append('num_comprobante', lastNumComp);
-	formData.append('idcaja', idCajaFinal);
 
 	var detalles = [];
 
 	$('#detalles .filas').each(function () {
-		var tipo = $(this).find('input[name="idarticulo[]"]').length ? "_producto" : "_servicio";
-		var id = $(this).find('input[name="idarticulo[]"]').val() || $(this).find('input[name="idservicio[]"]').val();
+		var id = $(this).find('input[name="idarticulo[]"]').val();
+		var tipo = "_producto";
 		detalles.push(id + tipo);
 	});
 
@@ -2034,24 +1394,13 @@ function guardaryeditar(e) {
 				// Si la conversión a JSON falla, datos es probablemente una cadena.
 				console.log(datos);
 				console.log(typeof (datos));
-				if (datos == "Uno de los productos no forman parte del local seleccionado.") {
-					console.log("entro al if =)");
-
-					var local = $("#idlocal_session option:selected").text();
-					var localLimpiado = local.replace(/ - \d{3,}.*/, '');
-
-					bootbox.alert(datos + " Debe asegurarse de seleccionar solo los productos que sean del local: <strong>" + localLimpiado + "</strong>.");
-				} else {
-					bootbox.alert(datos);
-				}
-
+				bootbox.alert(datos);
 				return;
 			}
 		},
 
 	});
 }
-
 
 function modalPrecuentaFinal(idventa) {
 	$('#myModal8').modal('show');
@@ -2122,8 +1471,8 @@ function modalDetalles(idventa, usuario, num_comprobante, cliente, cliente_tipo_
 		let subtotal = 0;
 
 		data.articulos.forEach(item => {
-			let descripcion = item.articulo ? item.articulo : item.servicio;
-			let codigo = item.codigo_articulo ? item.codigo_articulo : item.cod_servicio;
+			let descripcion = item.articulo;
+			let codigo = item.codigo_articulo;
 
 			let row = `
                 <tr>
@@ -2243,14 +1592,13 @@ function anular(idventa) {
 			$.post("../ajax/venta.php?op=anular", { idventa: idventa }, function (e) {
 				bootbox.alert(e);
 				tabla.ajax.reload();
-				$.post("../ajax/venta.php?op=listarTodosLocalActivosPorUsuario", function (data) {
+				$.post("../ajax/venta.php?op=listarTodosActivos", function (data) {
 					const obj = JSON.parse(data);
 
 					let articulo = obj.articulo;
-					let servicio = obj.servicio;
 
-					listarSelectsArticulos(articulo, servicio);
-					listarArticulos(articulo, servicio);
+					listarSelectsArticulos(articulo);
+					listarArticulos(articulo);
 				});
 			});
 		}
@@ -2263,14 +1611,13 @@ function eliminar(idventa) {
 			$.post("../ajax/venta.php?op=eliminar", { idventa: idventa }, function (e) {
 				bootbox.alert(e);
 				tabla.ajax.reload();
-				$.post("../ajax/venta.php?op=listarTodosLocalActivosPorUsuario", function (data) {
+				$.post("../ajax/venta.php?op=listarTodosActivos", function (data) {
 					const obj = JSON.parse(data);
 
 					let articulo = obj.articulo;
-					let servicio = obj.servicio;
 
-					listarSelectsArticulos(articulo, servicio);
-					listarArticulos(articulo, servicio);
+					listarSelectsArticulos(articulo);
+					listarArticulos(articulo);
 				});
 			});
 		}
@@ -2282,13 +1629,13 @@ var detalles = 0;
 
 // $("#btnGuardar").hide();
 
-function agregarDetalle(tipoproducto, idarticulo, idpersonal, nombre, local, stock, precio_compra, precio_venta, comision, codigo) {
+function agregarDetalle(idarticulo, nombre, stock, precio_venta, codigo) {
 	var cantidad = 1;
 	var descuento = '0.00';
 
 	if (idarticulo != "") {
 		var fila = '<tr class="filas fila' + cont + ' principal">' +
-			'<td><input type="hidden" name="' + (tipoproducto == "producto" ? "idarticulo[]" : "idservicio[]") + '" value="' + idarticulo + '"><input type="hidden" step="any" name="precio_compra[]" value="' + precio_compra + '"><input type="hidden" step="any" name="idpersonal[]" value="' + idpersonal + '"><input type="hidden" name="comision[]" value="' + comision + '">' + codigo + '</td>' +
+			'<td><input type="hidden" name="idarticulo[]" value="' + idarticulo + '">' + codigo + '</td>' +
 			'<td>' + capitalizarTodasLasPalabras(nombre) + '</td>' +
 			'<td><input type="number" step="any" name="precio_venta[]" oninput="modificarSubototales();" id="precio_venta[]" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" required value="' + (precio_venta == '' ? parseFloat(0).toFixed(2) : precio_venta) + '"></td>' +
 			'<td><input type="number" step="any" name="descuento[]" oninput="modificarSubototales();" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="0" required value="' + descuento + '"></td>' +
@@ -2297,10 +1644,8 @@ function agregarDetalle(tipoproducto, idarticulo, idpersonal, nombre, local, sto
 			'</tr>';
 
 		var fila2 = '<tr class="filas fila' + cont + ' principal2">' +
-			'<td class="nowrap-cell" style="text-align: start !important;"><input type="hidden" name="' + (tipoproducto == "producto" ? "idarticulo[]" : "idservicio[]") + '" value="' + idarticulo + '"><input type="hidden" step="any" name="precio_compra[]" value="' + precio_compra + '"><input type="hidden" name="idpersonal[]" value="' + idpersonal + '"><input type="hidden" name="comision[]" value="' + comision + '">' + codigo + '</td>' +
+			'<td class="nowrap-cell" style="text-align: start !important;"><input type="hidden" name="idarticulo[]" value="' + idarticulo + '">' + codigo + '</td>' +
 			'<td style="text-align: start !important;">' + capitalizarTodasLasPalabras(nombre) + '</td>' +
-			'<td style="text-align: start !important;"><strong>' + capitalizarTodasLasPalabras(local) + '</strong></td>' +
-			'<td style="text-align: start !important;">' + (tipoproducto == "producto" ? stock : "") + '</td>' +
 			'<td><div style="display: flex; align-items: center; justify-content: center;"><input type="number" class="form-control" step="any" name="precio_venta[]" oninput="modificarSubototales2();" id="precio_venta[]" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" required value="' + (precio_venta == '' ? parseFloat(0).toFixed(2) : precio_venta) + '"></div></td>' +
 			'<td><div style="display: flex; align-items: center; justify-content: center;"><input type="number" class="form-control" step="any" name="descuento[]" oninput="modificarSubototales2();" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="0" required value="' + descuento + '"></div></td>' +
 			'<td><div style="display: flex; align-items: center; justify-content: center;"><input type="number" class="form-control" name="cantidad[]" id="cantidad[]" oninput="modificarSubototales2();" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" required value="' + cantidad + '"></div></td>' +
@@ -2316,7 +1661,7 @@ function agregarDetalle(tipoproducto, idarticulo, idpersonal, nombre, local, sto
 		evitarCaracteresEspecialesCamposNumericos();
 		aplicarRestrictATodosLosInputs();
 	} else {
-		bootbox.alert("Error al ingresar el detalle, revisar los datos del artículo o servicio");
+		bootbox.alert("Error al ingresar el detalle, revisar los datos del artículo");
 	}
 
 	mostrarOcultarColumnaAlmacen();

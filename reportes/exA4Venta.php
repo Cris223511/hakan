@@ -9,7 +9,6 @@ $rspta = $perfil->mostrarReporte();
 $logo = $rspta["imagen"];
 $ext_logo = strtolower(pathinfo($rspta["imagen"], PATHINFO_EXTENSION));
 $empresa = $rspta["titulo"];
-$auspiciado = $rspta["auspiciado"];
 $ruc = ($rspta["ruc"] == '') ? 'Sin registrar' : $rspta["ruc"];
 $direccion = ($rspta["direccion"] == '') ? 'Sin registrar' : $rspta["direccion"];
 $telefono = ($rspta["telefono"] == '') ? 'Sin registrar' : number_format($rspta["telefono"], 0, '', ' ');
@@ -38,12 +37,10 @@ $pdf->encabezado(
   $y,
   $logo,
   $ext_logo,
+  $ruc,
   $reg1->num_comprobante ?? '',
   $reg1->tipo_comprobante ?? '',
-  $reg1->local ?? '',
-  $reg1->local_ruc ?? '',
   $reg1->estado ?? '',
-  $reg1->caja ?? '',
   $reg1->usuario ?? '',
   (($reg1->tipo_documento_usuario) ? ($reg1->tipo_documento_usuario . ": " . $reg1->num_documento_usuario) : ("Tipo y N° doc. sin registrar.")) . "\n" .
     "Dirección: " . $reg1->direccion_usuario . "\n" .
@@ -98,8 +95,8 @@ $cols = array(
 $aligns = array(
   "PRODUCTO" => "L",
   "CANTIDAD" => "C",
-  "P.U." => "R",
-  "DSCTO" => "R",
+  "P.U." => "C",
+  "DSCTO" => "C",
   "SUBTOTAL" => "R"
 );
 
@@ -110,8 +107,8 @@ $pdf->addCols($cols, $aligns, $y);
 $cols = array(
   "PRODUCTO" => "L",
   "CANTIDAD" => "C",
-  "P.U." => "R",
-  "DSCTO" => "R",
+  "P.U." => "C",
+  "DSCTO" => "C",
   "SUBTOTAL" => "R"
 );
 
@@ -135,7 +132,7 @@ $y += 9;
 while ($reg2 = $rspta2->fetch_object()) {
   $subtotal = ($reg2->cantidad * $reg2->precio_venta) - $reg2->descuento;
 
-  $textoProducto = utf8_decode($reg2->idarticulo == "0" ? mb_strtoupper($reg2->servicio) : mb_strtoupper($reg2->articulo));
+  $textoProducto = mb_strtoupper($reg2->articulo);
   $anchoTexto = $pdf->GetStringWidth($textoProducto);
 
   $line = array(
@@ -274,7 +271,7 @@ $pdf->Image($filePath, 11.5, $y, 42);
 unlink($filePath);
 
 # Créditos #
-$pdf->creditosReporte($y, $reg1->tipo_comprobante ?? '', $auspiciado);
+$pdf->creditosReporte($y, $reg1->tipo_comprobante ?? '');
 
 # Tabla para los métodos de pago #
 $cols = array(

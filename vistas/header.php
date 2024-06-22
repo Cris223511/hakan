@@ -11,6 +11,12 @@ $cargo_login = $_SESSION['cargo_detalle'];
     min-height: 919px !important;
   }
 
+  div.dt-buttons {
+    position: relative;
+    float: left;
+    margin-bottom: 10px !important;
+  }
+
   .skin-blue-light .main-header .navbar .sidebar-toggle {
     transition: .3s ease all;
   }
@@ -166,7 +172,7 @@ $cargo_login = $_SESSION['cargo_detalle'];
   }
 
   .popover {
-    z-index: 99999 !important;
+    z-index: 999999 !important;
   }
 
   .box-title2 {
@@ -208,8 +214,8 @@ $cargo_login = $_SESSION['cargo_detalle'];
   <!-- AdminLTE Skins. Choose a skin from the css/skins
          folder instead of downloading all of them to reduce the load. -->
   <link rel="stylesheet" href="../public/css/_all-skins.min.css">
-  <link rel="apple-touch-icon" href="../public/img/apple-touch-icon.png">
-  <link rel="shortcut icon" href="../public/img/favicon.ico">
+  <link rel="apple-touch-icon" href="../public/img/icon.png">
+  <link rel="shortcut icon" href="../public/img/icon.ico">
 
   <!-- DATATABLES -->
   <link rel="stylesheet" type="text/css" href="../public/datatables/jquery.dataTables.min.css">
@@ -225,7 +231,7 @@ $cargo_login = $_SESSION['cargo_detalle'];
     <header class="main-header" style="box-shadow: 0px 0px 15px -7px; position: sticky !important; width: 100%">
       <a href="escritorio.php" class="logo" style="color: white !important; background-color: #002a8e !important;">
         <span class="logo-mini"><b>H.I.</b></span>
-        <span class="logo-lg" style="font-size: 15px;"><b>Hakan Export S.A.C.</b></span>
+        <span class="logo-lg" style="font-size: 15px;"><b>Hakan Import S.A.C.</b></span>
       </a>
       <nav class="navbar" role="navigation" style="background-color: #002a8e !important;">
         <div style="display: flex; align-items: center; float: left;">
@@ -244,7 +250,7 @@ $cargo_login = $_SESSION['cargo_detalle'];
                 <li class="user-header" style="background: #002a8e !important;">
                   <img src="../files/usuarios/<?php echo $_SESSION['imagen']; ?>" class="img-circle" alt="User Image">
                   <p style="color: white !important;">
-                    Hakan Export S.A.C.
+                    Hakan Import S.A.C.
                     <small>nuestro contacto: +51 992 719 552</small>
                   </p>
                 </li>
@@ -299,7 +305,7 @@ $cargo_login = $_SESSION['cargo_detalle'];
               </a>
               <ul class="treeview-menu">
                 <li id="lVentas"><a href="venta.php"><i class="fa fa-circle-o"></i> Ventas</a></li>
-                <li id="lProformas"><a href="proforma.php"><i class="fa fa-circle-o"></i> Proformas</a></li>
+                <!-- <li id="lProformas"><a href="proforma.php"><i class="fa fa-circle-o"></i> Proformas</a></li> -->
                 <li id="lClientes"><a href="clientes.php"><i class="fa fa-circle-o"></i> Clientes</a></li>
               </ul>
             </li>';
@@ -350,7 +356,7 @@ $cargo_login = $_SESSION['cargo_detalle'];
               </a>
               <ul class="treeview-menu">
               <li id="lReporteVenta"><a href="reporteVenta.php"><i class="fa fa-circle-o"></i> Reporte de ventas</a></li>
-              <li id="lReporteCotizacion"><a href="reporteProforma.php"><i class="fa fa-circle-o"></i> Reporte de cotizaciones</a></li>
+              <!-- <li id="lReporteCotizacion"><a href="reporteProforma.php"><i class="fa fa-circle-o"></i> Reporte de cotizaciones</a></li> -->
               </ul>
             </li>';
           }
@@ -381,7 +387,7 @@ $cargo_login = $_SESSION['cargo_detalle'];
               </a>
               <ul class="treeview-menu">
               <li id="lReporteVentaMetodoPago"><a href="reporteVentaMetodoPago.php"><i class="fa fa-circle-o"></i> Métodos de pago (ventas)</a></li>
-              <li id="lReporteProformaMetodoPago"><a href="reporteProformaMetodoPago.php"><i class="fa fa-circle-o"></i> Métodos de pago (cotizaciones)</a></li>
+              <!-- <li id="lReporteProformaMetodoPago"><a href="reporteProformaMetodoPago.php"><i class="fa fa-circle-o"></i> Métodos de pago (cotizaciones)</a></li> -->
               </ul>
             </li>';
           }

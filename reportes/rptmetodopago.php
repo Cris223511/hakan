@@ -36,11 +36,7 @@ if (!isset($_SESSION["nombre"])) {
     $idusuario = $_SESSION["idusuario"];
     $cargo = $_SESSION["cargo"];
 
-    if ($cargo == "superadmin" || $cargo == "admin_total") {
-      $rspta = $metodo_pago->listar();
-    } else {
-      $rspta = $metodo_pago->listarPorUsuario($idusuario);
-    }
+    $rspta = $metodo_pago->listar();
 
     $pdf->SetWidths(array(40, 110, 40));
 

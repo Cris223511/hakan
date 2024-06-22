@@ -47,11 +47,7 @@ if (!isset($_SESSION["nombre"])) {
     $idlocalSession = $_SESSION["idlocal"];
     $cargo = $_SESSION["cargo"];
 
-    if ($cargo == "superadmin" || $cargo == "admin_total") {
-      $rspta = $proforma->listar();
-    } else {
-      $rspta = $proforma->listarPorUsuario($idlocalSession);
-    }
+    $rspta = $proforma->listar();
 
     //Table with rows and columns
     $pdf->SetWidths(array(37, 38, 38, 33, 25, 20));
