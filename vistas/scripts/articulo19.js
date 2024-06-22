@@ -42,9 +42,10 @@ function init() {
 				const select = selects[selectId];
 				const atributo = selectId.replace('id', '');
 
+				select.empty();
+				select.html('<option value="">- Seleccione -</option>');
+				
 				if (obj.hasOwnProperty(atributo)) {
-					select.empty();
-					select.html('<option value="">- Seleccione -</option>');
 					obj[atributo].forEach(function (opcion) {
 						select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
 					});

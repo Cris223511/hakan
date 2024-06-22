@@ -70,10 +70,6 @@ if (!isset($_SESSION["nombre"])) {
         align-content: center;
       }
 
-      .bs-searchbox .form-control {
-        height: 34px !important;
-      }
-
       #total_venta {
         background-color: #ebc513 !important;
         color: black !important;

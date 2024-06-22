@@ -65,10 +65,10 @@ if (!isset($_SESSION["nombre"])) {
         position: absolute;
       }
 
-      .contenedor_articulos .form-control,
-      .contenedor_articulos .form-control button {
-        height: 45px !important;
-        font-size: 16px !important;
+      .contenedor_articulos .form-control:not(textarea),
+      .contenedor_articulos .form-control button:not(textarea) {
+        height: 45px;
+        font-size: 16px;
         align-content: center;
       }
     </style>
@@ -188,17 +188,10 @@ if (!isset($_SESSION["nombre"])) {
                         <label>Stock mínimo(*):</label>
                         <input type="number" class="form-control" name="stock_minimo" id="stock_minimo" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" placeholder="Ingrese el stock mínimo." required>
                       </div>
-                      <div class="form-group col-lg-6 col-md-6 col-sm-12">
+                      <div class="form-group col-lg-12 col-md-12 col-sm-12">
                         <label>Imagen:</label>
                         <input type="file" class="form-control" name="imagen" id="imagen" accept=".jpg,.jpeg,.png,.jfif,.bmp">
                         <input type="hidden" name="imagenactual" id="imagenactual">
-                      </div>
-                      <div class="form-group col-lg-6 col-md-6 col-sm-12">
-                        <label>Descripción:</label>
-                        <input type="text" class="form-control" name="descripcion" id="descripcion" maxlength="1000" placeholder="Ingrese la descripción del producto." autocomplete="off">
-                        <div style="display: flex; justify-content: end;">
-                          <div id="camera"></div>
-                        </div>
                       </div>
                       <!-- <div class="form-group col-lg-6 col-md-12 col-sm-12">
                         <div>
@@ -229,6 +222,10 @@ if (!isset($_SESSION["nombre"])) {
                         <div class="form-group col-lg-6 col-md-12">
                           <label>Color:</label>
                           <input type="text" class="form-control" name="color" id="color" maxlength="30" placeholder="Ingrese el color del producto." autocomplete="off">
+                        </div>
+                        <div class="form-group col-lg-12 col-md-12 col-sm-12">
+                          <label>Descripción:</label>
+                          <textarea class="form-control" id="descripcion" name="descripcion" maxlength="1000" rows="5" placeholder="Ingrese la descripción del producto." autocomplete="off"></textarea>
                         </div>
                       </div>
                       <!-- end form detalles -->

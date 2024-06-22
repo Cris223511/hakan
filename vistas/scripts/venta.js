@@ -70,9 +70,10 @@ function init() {
 				const select = selects[selectId];
 				const atributo = selectId.replace('id', '');
 
+				select.empty();
+				select.html('<option value="">- Seleccione -</option>');
+				
 				if (obj.hasOwnProperty(atributo)) {
-					select.empty();
-					select.html('<option value="">- Seleccione -</option>');
 					obj[atributo].forEach(function (opcion) {
 						select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
 					});
@@ -95,9 +96,10 @@ function listarTodosActivos(selectId) {
 		const select = $("#" + selectId);
 		const atributo = selectId.replace('id', '');
 
+		select.empty();
+		select.html('<option value="">- Seleccione -</option>');
+		
 		if (obj.hasOwnProperty(atributo)) {
-			select.empty();
-			select.html('<option value="">- Seleccione -</option>');
 			obj[atributo].forEach(function (opcion) {
 				select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
 			});
@@ -1646,6 +1648,7 @@ function agregarDetalle(idarticulo, nombre, stock, precio_venta, codigo) {
 		var fila2 = '<tr class="filas fila' + cont + ' principal2">' +
 			'<td class="nowrap-cell" style="text-align: start !important;"><input type="hidden" name="idarticulo[]" value="' + idarticulo + '">' + codigo + '</td>' +
 			'<td style="text-align: start !important;">' + capitalizarTodasLasPalabras(nombre) + '</td>' +
+			'<td style="text-align: center;">' + stock + '</td>' +
 			'<td><div style="display: flex; align-items: center; justify-content: center;"><input type="number" class="form-control" step="any" name="precio_venta[]" oninput="modificarSubototales2();" id="precio_venta[]" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" required value="' + (precio_venta == '' ? parseFloat(0).toFixed(2) : precio_venta) + '"></div></td>' +
 			'<td><div style="display: flex; align-items: center; justify-content: center;"><input type="number" class="form-control" step="any" name="descuento[]" oninput="modificarSubototales2();" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="0" required value="' + descuento + '"></div></td>' +
 			'<td><div style="display: flex; align-items: center; justify-content: center;"><input type="number" class="form-control" name="cantidad[]" id="cantidad[]" oninput="modificarSubototales2();" lang="en-US" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="6" onkeydown="evitarNegativo(event)" onpaste="return false;" onDrop="return false;" min="1" required value="' + cantidad + '"></div></td>' +

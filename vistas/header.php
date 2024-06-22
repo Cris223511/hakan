@@ -7,6 +7,10 @@ $cargo_login = $_SESSION['cargo_detalle'];
 ?>
 
 <style>
+  .bs-searchbox .form-control {
+    height: 34px !important;
+  }
+
   .content-wrapper {
     min-height: 919px !important;
   }
