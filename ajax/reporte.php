@@ -445,7 +445,7 @@ if (!isset($_SESSION["nombre"])) {
 									<img src="../files/articulos/' . $reg->imagen . '" height="50px" width="50px" class="img-fluid">
 								</a>',
 						"1" => $reg->nombre,
-						"2" => $reg->cantidad,
+						"2" => $reg->total_cantidad,
 						"3" => $reg->categoria,
 						"4" => $reg->codigo_producto,
 						"5" => ($reg->stock > 0 && $reg->stock < $reg->stock_minimo) ? '<span style="color: #Ea9900; font-weight: bold">' . $reg->stock . '</span>' : (($reg->stock != '0') ? '<span>' . $reg->stock . '</span>' : '<span style="color: red; font-weight: bold">' . $reg->stock . '</span>'),

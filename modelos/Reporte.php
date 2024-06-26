@@ -146,7 +146,7 @@ class Reporte
 				  a.idarticulo,
 				  a.idusuario,
 				  a.idcategoria,
-				  COUNT(dv.idarticulo) as cantidad,
+				  SUM(dv.cantidad) as total_cantidad,
 				  u.nombre as usuario,
 				  u.cargo as cargo,
 				  u.cargo,
