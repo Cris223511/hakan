@@ -72,7 +72,7 @@ function init() {
 
 				select.empty();
 				select.html('<option value="">- Seleccione -</option>');
-				
+
 				if (obj.hasOwnProperty(atributo)) {
 					obj[atributo].forEach(function (opcion) {
 						select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
@@ -98,7 +98,7 @@ function listarTodosActivos(selectId) {
 
 		select.empty();
 		select.html('<option value="">- Seleccione -</option>');
-		
+
 		if (obj.hasOwnProperty(atributo)) {
 			obj[atributo].forEach(function (opcion) {
 				select.append('<option value="' + opcion.id + '">' + opcion.titulo + '</option>');
@@ -476,6 +476,9 @@ function listarSelects(articulos, clientes) {
 	$('#idcliente').closest('.form-group').find('input[type="text"]').attr('onkeydown', 'checkEnter(event)');
 	$('#idcliente').closest('.form-group').find('input[type="text"]').attr('oninput', 'checkDNI(this)');
 	$('#idcliente').closest('.form-group').find('.dropdown-menu.open').addClass('idclienteInput');
+
+	$("#idcliente").val(0);
+	$("#idcliente").selectpicker("refresh");
 
 	colocarNegritaStocksSelects();
 }
